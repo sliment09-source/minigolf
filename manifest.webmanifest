@@ -1,0 +1,20 @@
+{
+  "name": "Minigolf – skóre",
+  "short_name": "Minigolf",
+  "description": "Zápis skóre na 18 jamek, průběžné pořadí a historie her.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#EDF1F0",
+  "theme_color": "#14508C",
+  "orientation": "portrait",
+  "lang": "cs",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
