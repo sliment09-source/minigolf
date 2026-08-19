@@ -46,7 +46,7 @@ html{background:var(--paper)}
 /* Jemný obrázek na pozadí celé appky (~14 %) */
 html::before{
   content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:url("bg.png") center top / cover no-repeat;
+  background:url("bg.webp") center top / cover no-repeat;
   opacity:.14;
 }
 @media (prefers-color-scheme: dark){ html::before{opacity:.10} }
@@ -266,6 +266,38 @@ tr.win td.sticky{color:var(--cobalt)}
   box-shadow:var(--shadow);animation:up .2s ease}
 .toast.bad{background:var(--signal);color:#fff}
 .hint{color:var(--ink-soft);font-size:13px;margin:8px 2px 0}
+/* ---------- stupně vítězů ---------- */
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-top:4px}
+.pod{flex:1;max-width:132px;min-width:0;display:flex;flex-direction:column;align-items:center}
+.pod .medal{font-size:19px;line-height:1;margin-bottom:3px}
+.pod .nm{font-weight:700;font-size:14px;text-align:center;max-width:100%;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:5px}
+.pod .sc{font-family:var(--display);font-size:25px;line-height:1.05}
+.pod .sub{font-size:11px;color:var(--ink-soft)}
+.pod .step{
+  width:100%;margin-top:8px;border-radius:11px 11px 0 0;display:grid;place-items:center;
+  font-family:var(--display);font-size:27px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);
+  box-shadow:var(--shadow);
+}
+.pod.p1 .step{height:104px;background:linear-gradient(180deg,#F7C63A,#D69B08)}
+.pod.p2 .step{height:78px;background:linear-gradient(180deg,#C3CED6,#93A4B0)}
+.pod.p3 .step{height:60px;background:linear-gradient(180deg,#D5915B,#A96A38)}
+.pod.p1 .ava{box-shadow:0 0 0 3px #F2B417}
+
+.rest{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.restrow{display:flex;align-items:center;gap:10px;background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.restrow .r{font-family:var(--display);color:var(--ink-soft);min-width:24px;text-align:center}
+.restrow .nm{flex:1;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.restrow .sc{font-family:var(--display);font-size:20px}
+.restrow .sub{font-size:11px;color:var(--ink-soft);margin-left:6px}
+
+.locknote{
+  display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:11px 13px;color:var(--ink-soft);font-size:13px;margin-top:10px;
+}
+.hole.locked{opacity:.85}
+
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 /* ---------- profilovky ---------- */
@@ -581,6 +613,7 @@ function goHome() {
 /* ---------------------- zápis skóre ---------------------- */
 function setScore(hole, player, strokes) {
   var g = S.game; if (!g) return;
+  if (g.stav === 'finished') { toast('Hra je ukončená, skóre už nejde měnit', true); return; }
   var k = key(hole, player);
   if (strokes == null) delete S.scores[k]; else S.scores[k] = strokes;
   enqueue('score:' + g.id + ':' + k, 'score', {
@@ -687,12 +720,13 @@ function viewGame() {
   if (!g) return '<div class="top"><button class="iconbtn" data-act="home">←</button><div class="grow"><div class="brand">Načítám…</div></div></div>';
 
   var st = standings(g, S.scores);
+  var hotovo = (g.stav === 'finished');
   var h = '';
 
   h += '<div class="top">' +
        '<button class="iconbtn" data-act="home" aria-label="Zpět">←</button>' +
-       '<div class="grow"><div class="brand" style="font-size:19px">' + esc(g.misto || 'Minigolf') + '</div>' +
-       '<div class="subtle num">' + esc(czDate(g.datum)) + ' · ' + g.hraci.length + ' ' + pl(g.hraci.length, 'hráč', 'hráči', 'hráčů') + '</div></div>' +
+       '<div class="grow"><div class="brand" style="font-size:19px">' + (hotovo ? '🔒 ' : '') + esc(g.misto || 'Minigolf') + '</div>' +
+       '<div class="subtle num">' + esc(czDate(g.datum)) + ' · ' + g.hraci.length + ' ' + pl(g.hraci.length, 'hráč', 'hráči', 'hráčů') + (hotovo ? ' · ukončeno' : '') + '</div></div>' +
        syncPill() +
        '<button class="iconbtn" data-act="refresh" aria-label="Načíst skóre znovu">⟳</button>' +
        '<button class="iconbtn" data-act="settings" aria-label="Nastavení hry">⋯</button>' +
@@ -700,20 +734,24 @@ function viewGame() {
 
   h += '<div class="wrap">';
 
-  h += '<h2 style="margin-top:14px">Pořadí</h2><div class="board">';
-  st.forEach(function (r, i) {
-    var extra = [];
-    if (r.aces) extra.push(r.aces + '× eso');
-    if (r.ne) extra.push(r.ne + '× NE');
-    h += '<div class="lb' + (i === 0 && r.jamky ? ' first' : '') + '">' +
-      '<div class="lbtop">' + avaHtml(r.jmeno, avaOf(g, r.i), 34) +
-        '<span class="pos">' + (r.jamky ? r.poradi + '.' : '–') + '</span></div>' +
-      '<div class="nm">' + esc(r.jmeno) + '</div>' +
-      '<div class="tot num">' + (r.jamky ? r.soucet : '–') + '</div>' +
-      '<div class="thru num">' + r.jamky + '/' + HOLES + ' jamek' + (extra.length ? ' · ' + extra.join(' · ') : '') + '</div>' +
-    '</div>';
-  });
-  h += '</div>';
+  if (hotovo) {
+    h += '<h2 style="margin-top:14px">Výsledek</h2>' + podium(g, st);
+  } else {
+    h += '<h2 style="margin-top:14px">Pořadí</h2><div class="board">';
+    st.forEach(function (r, i) {
+      var extra = [];
+      if (r.aces) extra.push(r.aces + '× eso');
+      if (r.ne) extra.push(r.ne + '× NE');
+      h += '<div class="lb' + (i === 0 && r.jamky ? ' first' : '') + '">' +
+        '<div class="lbtop">' + avaHtml(r.jmeno, avaOf(g, r.i), 34) +
+          '<span class="pos">' + (r.jamky ? r.poradi + '.' : '–') + '</span></div>' +
+        '<div class="nm">' + esc(r.jmeno) + '</div>' +
+        '<div class="tot num">' + (r.jamky ? r.soucet : '–') + '</div>' +
+        '<div class="thru num">' + r.jamky + '/' + HOLES + ' jamek' + (extra.length ? ' · ' + extra.join(' · ') : '') + '</div>' +
+      '</div>';
+    });
+    h += '</div>';
+  }
 
   if (S.tab === 'holes') {
     h += '<h2>Jamky</h2><div class="holes">';
@@ -725,7 +763,7 @@ function viewGame() {
         else dots += '<i></i>';
       }
       var pct = Math.round(filled / g.hraci.length * 100);
-      h += '<button class="hole' + (filled === g.hraci.length ? ' done' : '') + '" data-act="hole" data-hole="' + hole + '" style="--fill:' + pct + '%">' +
+      h += '<button class="hole' + (filled === g.hraci.length ? ' done' : '') + (hotovo ? ' locked' : '') + '" data-act="' + (hotovo ? 'locked' : 'hole') + '" data-hole="' + hole + '" style="--fill:' + pct + '%">' +
         '<span class="fill"></span>' +
         '<span class="hnum num">' + (hole < 10 ? '0' : '') + hole + '</span>' +
         '<span class="par num">' + filled + '/' + g.hraci.length + '</span>' +
@@ -733,7 +771,9 @@ function viewGame() {
       '</button>';
     }
     h += '</div>';
-    h += '<div class="hint">Klepni na jamku a zapiš údery. Jamky můžeš vyplňovat v libovolném pořadí.</div>';
+    h += hotovo
+      ? '<div class="locknote">🔒 Hra je ukončená, skóre už nejde měnit. Odemkneš ji přes ⋯ → Znovu otevřít.</div>'
+      : '<div class="hint">Klepni na jamku a zapiš údery. Jamky můžeš vyplňovat v libovolném pořadí.</div>';
   } else {
     h += '<h2>Karta</h2>' + scorecard(g, st);
   }
@@ -753,6 +793,49 @@ function isNarrow() {
 }
 if (mqNarrow && mqNarrow.addEventListener) mqNarrow.addEventListener('change', function () { paint(); });
 else if (mqNarrow && mqNarrow.addListener) mqNarrow.addListener(function () { paint(); });
+
+/* Stupně vítězů – druhý vlevo, vítěz uprostřed, třetí vpravo. */
+function podium(g, st) {
+  var hrani = st.filter(function (r) { return r.jamky > 0; });
+  if (!hrani.length) return '<div class="empty">Hra skončila bez zapsaného skóre.</div>';
+
+  var top = hrani.slice(0, 3);
+  var poradiNaStupni = top.length >= 3 ? [top[1], top[0], top[2]]
+                     : top.length === 2 ? [top[1], top[0]]
+                     : [top[0]];
+  var medaile = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+  var h = '<div class="podium">';
+  poradiNaStupni.forEach(function (r) {
+    var m = Number(r.poradi);
+    var cls = (m >= 1 && m <= 3) ? 'p' + m : 'p3';
+    h += '<div class="pod ' + cls + '">' +
+      '<div class="medal">' + (medaile[m] || '') + '</div>' +
+      avaHtml(r.jmeno, avaOf(g, r.i), 54) +
+      '<div class="nm">' + esc(r.jmeno) + '</div>' +
+      '<div class="sc num">' + r.soucet + '</div>' +
+      '<div class="sub num">' + r.jamky + '/' + HOLES + (r.ne ? ' · ' + r.ne + '× NE' : '') + '</div>' +
+      '<div class="step num">' + m + '</div>' +
+    '</div>';
+  });
+  h += '</div>';
+
+  var zbytek = hrani.slice(3).concat(st.filter(function (r) { return r.jamky === 0; }));
+  if (zbytek.length) {
+    h += '<div class="rest">';
+    zbytek.forEach(function (r) {
+      h += '<div class="restrow">' +
+        '<span class="r num">' + (r.jamky ? r.poradi + '.' : '–') + '</span>' +
+        avaHtml(r.jmeno, avaOf(g, r.i), 30) +
+        '<span class="nm">' + esc(r.jmeno) + '</span>' +
+        '<span class="sc num">' + (r.jamky ? r.soucet : '–') + '</span>' +
+        (r.ne ? '<span class="sub num">' + r.ne + '× NE</span>' : '') +
+      '</div>';
+    });
+    h += '</div>';
+  }
+  return h;
+}
 
 function scorecard(g, st) {
   return (isNarrow() ? cardByHole(g, st) : cardByPlayer(g, st)) + cardFooter(g);
@@ -803,12 +886,13 @@ function cardByPlayer(g, st) {
 }
 
 function cardFooter(g) {
+  var hotovo = (g.stav === 'finished');
   return '<div class="hint">NE = jamka nedaná ani na ' + MAX_UDERU + '. pokus, počítá se za ' + NESPLNENO + ' bodů.' +
-    (isNarrow() ? ' Klepnutím na řádek jamky ji rovnou otevřeš.' : '') + '</div>' +
+    (isNarrow() && !hotovo ? ' Klepnutím na řádek jamky ji rovnou otevřeš.' : '') + '</div>' +
     '<div class="row" style="margin-top:12px">' +
     '<button class="btn ghost" data-act="share">Sdílet odkaz</button>' +
-    '<button class="btn ghost" data-act="' + (g.stav === 'finished' ? 'reopen' : 'finish') + '">' +
-    (g.stav === 'finished' ? 'Znovu otevřít' : 'Ukončit hru') + '</button></div>';
+    '<button class="btn ' + (hotovo ? 'ghost' : '') + '" data-act="' + (hotovo ? 'reopen' : 'finish') + '">' +
+    (hotovo ? 'Znovu otevřít' : 'Ukončit a vyhlásit') + '</button></div>';
 }
 
 /* ---------- panel jamky ---------- */
@@ -952,6 +1036,28 @@ var editState = null;
 
 function sheetSettings() {
   var g = S.game;
+  var hotovo = (g.stav === 'finished');
+
+  if (hotovo) {
+    var seznam = g.hraci.map(function (jm, i) {
+      return '<div class="restrow">' + avaHtml(jm, avaOf(g, i), 30) +
+        '<span class="nm">' + esc(jm) + '</span></div>';
+    }).join('');
+    return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Ukončená hra">' +
+      '<div class="sheet-head"><div class="t">🔒 Ukončená hra</div><button class="iconbtn" data-act="close" aria-label="Zavřít">✕</button></div>' +
+      '<div class="locknote" style="margin-top:0">Hra je uzamčená, aby do výsledku už nikdo nesáhl. Chceš-li něco opravit, nejdřív ji znovu otevři.</div>' +
+      '<label class="f">Kde a kdy</label>' +
+      '<div class="restrow"><span class="nm">' + esc(g.misto || 'Minigolf') + '</span><span class="sc num" style="font-size:15px">' + esc(czDate(g.datum)) + '</span></div>' +
+      '<label class="f">Hráči</label><div class="rest" style="margin-top:0">' + seznam + '</div>' +
+      '<div class="row" style="margin-top:16px">' +
+        '<button class="btn ghost" data-act="share">Sdílet odkaz</button>' +
+        '<button class="btn" data-act="reopen">Znovu otevřít</button>' +
+      '</div>' +
+      '<div style="margin-top:10px"><button class="btn danger" data-act="del">Smazat hru</button></div>' +
+      '<div class="hint">Smazání odstraní hru i její skóre z Google Sheets. Nejde vrátit zpět.</div>' +
+    '</div></div>';
+  }
+
   if (!editState) {
     editState = {
       datum: String(g.datum).slice(0, 10),
@@ -1048,10 +1154,15 @@ document.addEventListener('click', function (ev) {
     case 'create': createGame(); break;
 
     case 'hole':
+      if (S.game && S.game.stav === 'finished') { toast('Hra je ukončená, skóre už nejde měnit', true); break; }
       var hn = Number(t.getAttribute('data-hole'));
       holeState.hole = hn;
       holeState.player = firstEmptyPlayer(hn);
       openSheet = sheetHole; paint(); break;
+
+    case 'locked':
+      toast('Hra je ukončená. Odemkneš ji přes ⋯ → Znovu otevřít.', true);
+      break;
 
     case 'pick': holeState.player = Number(t.getAttribute('data-p')); paint(); break;
 
@@ -1187,10 +1298,22 @@ function saveGameEdits() {
 
 function setStav(stav) {
   var g = S.game;
+  if (stav === 'finished') {
+    var chybi = 0;
+    for (var hle = 1; hle <= HOLES; hle++) {
+      for (var pi2 = 0; pi2 < g.hraci.length; pi2++) if (!S.scores[key(hle, pi2)]) chybi++;
+    }
+    var otazka = chybi
+      ? 'Ještě chybí ' + chybi + ' ' + pl(chybi, 'zápis', 'zápisy', 'zápisů') + '. Opravdu hru ukončit a uzamknout?'
+      : 'Ukončit hru a uzamknout výsledek?';
+    if (!confirm(otazka)) return;
+  }
   g.stav = stav;
-  openSheet = null; paint();
+  openSheet = null; editState = null;
+  if (stav === 'finished') S.tab = 'holes';
+  paint();
   api('updateGame', { id: g.id, payload: { stav: stav } })
-    .then(function () { toast(stav === 'finished' ? 'Hra ukončena' : 'Hra znovu otevřena'); })
+    .then(function () { toast(stav === 'finished' ? 'Hra ukončena a uzamčena' : 'Hra znovu otevřena'); })
     .catch(function (e) { toast(e.message, true); });
 }
 

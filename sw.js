@@ -1,7 +1,7 @@
 /* Minigolf – skóre: jednoduchý offline cache.
    Aplikace se načte i bez signálu, zápisy se pošlou, jakmile je internet zpátky. */
-var CACHE = 'minigolf-v1';
-var SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+var CACHE = 'minigolf-v2';
+var SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './bg.webp'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));
