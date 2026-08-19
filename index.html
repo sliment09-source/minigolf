@@ -179,6 +179,7 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 }
 @keyframes up{from{transform:translateY(24px)}to{transform:none}}
 @media (prefers-reduced-motion:reduce){.sheet,.sheet-in{animation:none}.hole .fill{transition:none}}
+.sheet.noanim,.sheet.noanim .sheet-in{animation:none}
 .sheet-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .sheet-head .t{flex:1;font-family:var(--display);font-size:24px;letter-spacing:.03em}
 
@@ -484,8 +485,8 @@ function enqueue(key, action, params) {
 
 var flushing = false;
 function flush() {
-  if (flushing || !S.queue.length) { paint(); return; }
-  flushing = true; S.syncing++; paint();
+  if (flushing || !S.queue.length) { paint({ sheetOnly: !!openSheet }); return; }
+  flushing = true; S.syncing++; paint({ sheetOnly: !!openSheet });
   var item = S.queue[0];
   api(item.action, item.params).then(function () {
     S.queue = S.queue.filter(function (i) { return i !== item; });
@@ -503,7 +504,7 @@ function flush() {
     throw e;
   }).then(function () {
     flushing = false; S.syncing--;
-    if (S.queue.length) flush(); else paint();
+    if (S.queue.length) flush(); else paint({ sheetOnly: !!openSheet });
   }, function () {
     flushing = false; S.syncing--;
     paint();
@@ -571,7 +572,7 @@ function pismeno(jmeno) {
 }/* idx = index do AVATARS nebo null; velikost v px */
 function avaHtml(jmeno, idx, size) {
   if (idx != null && AVATARS[idx]) {
-    return '<span class="ava" style="--s:' + size + 'px"><img src="' + AVATARS[idx] + '" alt="" loading="lazy"></span>';
+    return '<span class="ava" style="--s:' + size + 'px"><img src="' + AVATARS[idx] + '" alt="" decoding="sync"></span>';
   }
   return '<span class="ava fb" style="--s:' + size + 'px;--c:' + avaBarva(jmeno) + '">' + esc(pismeno(jmeno)) + '</span>';
 }
@@ -671,21 +672,59 @@ function setScore(hole, player, strokes) {
     strokes: strokes == null ? '' : strokes,
     jmeno: g.hraci[player] || ''
   });
-  paint();
 }
 
 /* =======================================================================
    VYKRESLENÍ
    ======================================================================= */
-function paint() {
-  var root = document.getElementById('root');
-  root.innerHTML = S.view === 'game' ? viewGame() : (S.view === 'career' ? viewKariera() : viewHome());
-  var ov = document.getElementById('overlay');
-  if (openSheet) ov.innerHTML = openSheet(); else ov.innerHTML = '';
-  if (afterPaint) { var f = afterPaint; afterPaint = null; f(); }
-}
 var openSheet = null;
 var afterPaint = null;
+var lastSheet = null;
+
+/* paint({sheetOnly:true}) překreslí jen otevřený panel – použité při zápisu úderů,
+   aby se stránka pod ním nepřepisovala a nic neproblikávalo. */
+function paint(opts) {
+  opts = opts || {};
+  if (!opts.sheetOnly) renderRoot();
+  renderOverlay();
+  if (afterPaint) { var f = afterPaint; afterPaint = null; f(); }
+}
+
+function renderRoot() {
+  var root = document.getElementById('root');
+  var stary = root.querySelector('.board');
+  var posun = stary ? stary.scrollLeft : 0;
+  root.innerHTML = S.view === 'game' ? viewGame() : (S.view === 'career' ? viewKariera() : viewHome());
+  var novy = root.querySelector('.board');
+  if (novy && posun) novy.scrollLeft = posun;
+}
+
+function renderOverlay() {
+  var ov = document.getElementById('overlay');
+  if (!openSheet) {
+    if (ov.innerHTML) ov.innerHTML = '';
+    lastSheet = null;
+    return;
+  }
+  var stejny = (lastSheet === openSheet);
+  var chipy = ov.querySelector('.pchips');
+  var posunChipu = chipy ? chipy.scrollLeft : 0;
+  var vnitrek = ov.querySelector('.sheet-in');
+  var posunPanelu = vnitrek ? vnitrek.scrollTop : 0;
+
+  ov.innerHTML = openSheet();
+
+  if (stejny) {
+    // stejný panel jen s novým obsahem – bez animace a se zachovaným posunem
+    var sheet = ov.querySelector('.sheet');
+    if (sheet) sheet.classList.add('noanim');
+    var vnitrek2 = ov.querySelector('.sheet-in');
+    if (vnitrek2 && posunPanelu) vnitrek2.scrollTop = posunPanelu;
+    var chipy2 = ov.querySelector('.pchips');
+    if (chipy2 && posunChipu) chipy2.scrollLeft = posunChipu;
+  }
+  lastSheet = openSheet;
+}
 
 function syncPill() {
   var cls = 'ok', txt = 'Uloženo';
@@ -1405,7 +1444,7 @@ document.addEventListener('click', function (ev) {
       toast('Hra je ukončená. Odemkneš ji přes ⋯ → Znovu otevřít.', true);
       break;
 
-    case 'pick': holeState.player = Number(t.getAttribute('data-p')); paint(); break;
+    case 'pick': holeState.player = Number(t.getAttribute('data-p')); paint({ sheetOnly: true }); break;
 
     case 'set':
       var raw = t.getAttribute('data-n');
@@ -1416,11 +1455,11 @@ document.addEventListener('click', function (ev) {
         var nx = nextEmptyPlayer(holeState.hole, holeState.player);
         if (nx != null) holeState.player = nx;
       }
-      paint();
+      paint({ sheetOnly: true });
       break;
 
-    case 'prev': if (holeState.hole > 1) { holeState.hole--; holeState.player = firstEmptyPlayer(holeState.hole); paint(); } break;
-    case 'next': if (holeState.hole < HOLES) { holeState.hole++; holeState.player = firstEmptyPlayer(holeState.hole); paint(); } break;
+    case 'prev': if (holeState.hole > 1) { holeState.hole--; holeState.player = firstEmptyPlayer(holeState.hole); paint({ sheetOnly: true }); } break;
+    case 'next': if (holeState.hole < HOLES) { holeState.hole++; holeState.player = firstEmptyPlayer(holeState.hole); paint({ sheetOnly: true }); } break;
 
     case 'close': openSheet = null; editState = null; paint(); break;
     case 'close-bg': openSheet = null; editState = null; paint(); break;
@@ -1583,11 +1622,11 @@ document.addEventListener('keydown', function (e) {
         setScore(holeState.hole, holeState.player, n);
         var nx = nextEmptyPlayer(holeState.hole, holeState.player);
         if (nx != null) holeState.player = nx;
-        paint();
+        paint({ sheetOnly: true });
       }
-    } else if (e.key === 'ArrowRight') { if (holeState.hole < HOLES) { holeState.hole++; holeState.player = firstEmptyPlayer(holeState.hole); paint(); } }
-    else if (e.key === 'ArrowLeft') { if (holeState.hole > 1) { holeState.hole--; holeState.player = firstEmptyPlayer(holeState.hole); paint(); } }
-    else if (e.key === 'Backspace') { setScore(holeState.hole, holeState.player, null); paint(); }
+    } else if (e.key === 'ArrowRight') { if (holeState.hole < HOLES) { holeState.hole++; holeState.player = firstEmptyPlayer(holeState.hole); paint({ sheetOnly: true }); } }
+    else if (e.key === 'ArrowLeft') { if (holeState.hole > 1) { holeState.hole--; holeState.player = firstEmptyPlayer(holeState.hole); paint({ sheetOnly: true }); } }
+    else if (e.key === 'Backspace') { setScore(holeState.hole, holeState.player, null); paint({ sheetOnly: true }); }
   } else if (openSheet && e.key === 'Escape') { openSheet = null; paint(); }
 });
 
@@ -1610,7 +1649,7 @@ document.addEventListener('touchend', function (e) {
   else if (dx > 0 && holeState.hole > 1) holeState.hole--;
   else return;
   holeState.player = firstEmptyPlayer(holeState.hole);
-  paint();
+  paint({ sheetOnly: true });
 }, { passive: true });
 
 /* ---------- odesílání čekajících zápisů ---------- */
