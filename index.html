@@ -976,8 +976,7 @@ function statistiky(g, st) {
     for (var hh = 1; hh <= HOLES; hh++) {
       var vv = S.scores[key(hh, r.i)];
       if (!vv) continue;
-      if (isNe(vv)) continue;
-      if (vv <= 4) d[vv]++; else d.v++;
+      if (vv <= 4) d[vv]++; else d.v++;   // nedaná jamka = 12 úderů, padá do 5+
       if (nej === null || vv < nej) nej = vv;
     }
     h2 += '<tr><td class="sticky"><span class="td-p">' + avaHtml(r.jmeno, avaOf(g, r.i), 24) +
@@ -992,7 +991,7 @@ function statistiky(g, st) {
       '<td class="num tot">' + jedno(r.soucet / r.jamky) + '</td></tr>';
   });
   h2 += '</tbody></table></div>';
-  h2 += '<div class="hint">Sloupec Nej je nejlepší jamka hráče, Ø je jeho průměr na jamku. Nedané jamky se do rozpisu úderů nepočítají.</div>';
+  h2 += '<div class="hint">Nedaná jamka se počítá jako ' + NESPLNENO + ' úderů, takže spadá do sloupce 5+ a je i v součtu a průměru. Sloupec NE ukazuje, kolikrát se to stalo. Nej je nejlepší jamka hráče, Ø jeho průměr na jamku.</div>';
 
   return h2;
 }
