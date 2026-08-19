@@ -256,7 +256,7 @@ tr.win td.sticky{color:var(--cobalt)}
   padding:9px 16px calc(9px + env(safe-area-inset-bottom));
 }
 .bottom .inner{max-width:760px;margin:0 auto;display:flex;gap:9px}
-.tab{flex:1;padding:14px 11px;border-radius:12px;font-weight:600;font-size:15px;text-align:center;border:1px solid transparent;color:var(--ink-soft)}
+.tab{flex:1;min-width:0;padding:14px 6px;border-radius:12px;font-weight:600;font-size:14px;text-align:center;border:1px solid transparent;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tab.on{background:var(--card);border-color:var(--line);color:var(--ink);box-shadow:var(--shadow)}
 
 /* ---------- toast ---------- */
@@ -313,6 +313,33 @@ tr.win td.sticky{color:var(--cobalt)}
 .avaopt.sel{border-color:var(--cobalt)}
 .avaopt.sel .ava{opacity:1;filter:none}
 .avaopt:active{transform:scale(.93)}
+
+/* ---------- statistiky ---------- */
+.statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+@media(min-width:480px){.statgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;box-shadow:var(--shadow);min-width:0}
+.stat .v{font-family:var(--display);font-size:25px;line-height:1.05}
+.stat .k{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
+.stat .s{font-size:11px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.barrow{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:9px 11px;margin-bottom:8px}
+.barrow .nm{font-weight:600;flex:0 0 76px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.barrow .track{flex:1;height:9px;border-radius:999px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden;min-width:30px}
+.barrow .fillb{height:100%;border-radius:999px;background:var(--cobalt);transition:width .3s ease}
+.barrow.best .fillb{background:var(--turf)}
+.barrow .v{font-family:var(--display);font-size:19px;min-width:42px;text-align:right}
+
+.holebars{display:flex;align-items:flex-end;gap:3px;height:118px;background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:10px 7px 8px}
+.hb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px}
+.hb .b{width:100%;border-radius:3px 3px 0 0;background:var(--cobalt);min-height:2px}
+.hb.max .b{background:var(--signal)}
+.hb.min .b{background:var(--turf)}
+.hb.none .b{background:var(--line)}
+.hb .l{font-size:9px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft);margin-top:7px}
+.legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
@@ -792,6 +819,8 @@ function viewGame() {
     h += hotovo
       ? '<div class="locknote">🔒 Hra je ukončená, skóre už nejde měnit. Odemkneš ji přes ⋯ → Znovu otevřít.</div>'
       : '<div class="hint">Klepni na jamku a zapiš údery. Jamky můžeš vyplňovat v libovolném pořadí.</div>';
+  } else if (S.tab === 'stats') {
+    h += '<h2>Statistiky</h2>' + statistiky(g, st);
   } else {
     h += '<h2>Karta</h2>' + scorecard(g, st);
   }
@@ -800,7 +829,8 @@ function viewGame() {
 
   h += '<div class="bottom"><div class="inner">' +
        '<button class="tab' + (S.tab === 'holes' ? ' on' : '') + '" data-act="tab" data-tab="holes">Jamky</button>' +
-       '<button class="tab' + (S.tab === 'card' ? ' on' : '') + '" data-act="tab" data-tab="card">Karta a pořadí</button>' +
+       '<button class="tab' + (S.tab === 'card' ? ' on' : '') + '" data-act="tab" data-tab="card">Karta</button>' +
+       '<button class="tab' + (S.tab === 'stats' ? ' on' : '') + '" data-act="tab" data-tab="stats">Statistiky</button>' +
        '</div></div>';
   return h;
 }
@@ -853,6 +883,118 @@ function podium(g, st) {
     h += '</div>';
   }
   return h;
+}
+
+/* ---------- statistiky ---------- */
+function statistiky(g, st) {
+  var np = g.hraci.length;
+
+  // průměry po jamkách
+  var jamky = [], celkSoucet = 0, celkPocet = 0;
+  for (var h = 1; h <= HOLES; h++) {
+    var s = 0, c = 0;
+    for (var p = 0; p < np; p++) {
+      var v = S.scores[key(h, p)];
+      if (v) { s += v; c++; }
+    }
+    jamky.push({ h: h, avg: c ? s / c : null, cnt: c });
+    celkSoucet += s; celkPocet += c;
+  }
+  if (!celkPocet) {
+    return '<div class="empty">Statistiky naskočí, jakmile zapíšeš první údery.</div>';
+  }
+
+  var esa = 0, neCelkem = 0;
+  st.forEach(function (r) { esa += r.aces; neCelkem += r.ne; });
+
+  // nejtěžší a nejlehčí jamka
+  var odehrane = jamky.filter(function (j) { return j.cnt > 0; });
+  var maxAvg = Math.max.apply(null, odehrane.map(function (j) { return j.avg; }));
+  var minAvg = Math.min.apply(null, odehrane.map(function (j) { return j.avg; }));
+  var nejtezsi = odehrane.filter(function (j) { return j.avg === maxAvg; });
+  var nejlehci = odehrane.filter(function (j) { return j.avg === minAvg; });
+
+  var hraciSeSkore = st.filter(function (r) { return r.jamky > 0; });
+  var prumery = hraciSeSkore.map(function (r) { return r.soucet / r.jamky; });
+  var nejlepsiPrumer = Math.min.apply(null, prumery);
+  var nejhorsiPrumer = Math.max.apply(null, prumery);
+
+  function jedno(n) { return n.toFixed(2).replace('.', ','); }
+  function seznamJamek(pole) { return pole.map(function (j) { return j.h; }).join(', '); }
+
+  var h2 = '';
+
+  // souhrn
+  h2 += '<div class="statgrid">' +
+    '<div class="stat"><div class="v num">' + jedno(celkSoucet / celkPocet) + '</div>' +
+      '<div class="k">Průměr na jamku</div><div class="s">všichni dohromady</div></div>' +
+    '<div class="stat"><div class="v num">' + celkPocet + '/' + (HOLES * np) + '</div>' +
+      '<div class="k">Zapsáno</div><div class="s">' + odehrane.length + ' ' + pl(odehrane.length, 'rozehraná jamka', 'rozehrané jamky', 'rozehraných jamek') + '</div></div>' +
+    '<div class="stat"><div class="v num" style="color:var(--sun)">' + esa + '</div>' +
+      '<div class="k">Es celkem</div><div class="s">jamka na jednu ránu</div></div>' +
+    '<div class="stat"><div class="v num" style="color:var(--signal)">' + neCelkem + '</div>' +
+      '<div class="k">Nedaných jamek</div><div class="s">po ' + NESPLNENO + ' bodech</div></div>' +
+  '</div>';
+
+  // průměr na jamku podle hráčů
+  h2 += '<h2>Průměr na jamku</h2>';
+  hraciSeSkore.forEach(function (r) {
+    var avg = r.soucet / r.jamky;
+    var sirka = Math.round(avg / nejhorsiPrumer * 100);
+    h2 += '<div class="barrow' + (avg === nejlepsiPrumer ? ' best' : '') + '">' +
+      avaHtml(r.jmeno, avaOf(g, r.i), 26) +
+      '<span class="nm">' + esc(r.jmeno) + '</span>' +
+      '<span class="track"><span class="fillb" style="width:' + sirka + '%"></span></span>' +
+      '<span class="v num">' + jedno(avg) + '</span>' +
+    '</div>';
+  });
+  h2 += '<div class="hint">Nižší číslo je lepší. Zelený pruh má hráč s nejlepším průměrem.</div>';
+
+  // obtížnost jamek
+  h2 += '<h2>Obtížnost jamek</h2><div class="holebars">';
+  jamky.forEach(function (j) {
+    var cls = j.cnt === 0 ? 'none' : (j.avg === maxAvg ? 'max' : (j.avg === minAvg ? 'min' : ''));
+    var vyska = j.cnt === 0 ? 3 : Math.max(6, Math.round(j.avg / maxAvg * 100));
+    h2 += '<div class="hb ' + cls + '" title="Jamka ' + j.h + (j.cnt ? ': průměr ' + jedno(j.avg) : ': zatím nic') + '">' +
+      '<span class="b" style="height:' + vyska + '%"></span>' +
+      '<span class="l">' + j.h + '</span>' +
+    '</div>';
+  });
+  h2 += '</div>';
+  h2 += '<div class="legend">' +
+    '<span><i style="background:var(--signal)"></i>nejtěžší: jamka ' + seznamJamek(nejtezsi) + ' (' + jedno(maxAvg) + ')</span>' +
+    '<span><i style="background:var(--turf)"></i>nejlehčí: jamka ' + seznamJamek(nejlehci) + ' (' + jedno(minAvg) + ')</span>' +
+  '</div>';
+
+  // rozpis úderů
+  h2 += '<h2>Kdo co nahrál</h2><div class="tablewrap"><table><thead><tr>' +
+    '<th class="sticky">Hráč</th><th class="num">1</th><th class="num">2</th><th class="num">3</th>' +
+    '<th class="num">4</th><th class="num">5+</th><th class="num">NE</th>' +
+    '<th class="num">Nej</th><th class="num">Ø</th></tr></thead><tbody>';
+  hraciSeSkore.forEach(function (r) {
+    var d = { 1: 0, 2: 0, 3: 0, 4: 0, v: 0 }, nej = null;
+    for (var hh = 1; hh <= HOLES; hh++) {
+      var vv = S.scores[key(hh, r.i)];
+      if (!vv) continue;
+      if (isNe(vv)) continue;
+      if (vv <= 4) d[vv]++; else d.v++;
+      if (nej === null || vv < nej) nej = vv;
+    }
+    h2 += '<tr><td class="sticky"><span class="td-p">' + avaHtml(r.jmeno, avaOf(g, r.i), 24) +
+      '<span>' + esc(r.jmeno) + '</span></span></td>' +
+      '<td class="num' + (d[1] ? ' ace' : '') + '">' + (d[1] || '·') + '</td>' +
+      '<td class="num">' + (d[2] || '·') + '</td>' +
+      '<td class="num">' + (d[3] || '·') + '</td>' +
+      '<td class="num">' + (d[4] || '·') + '</td>' +
+      '<td class="num">' + (d.v || '·') + '</td>' +
+      '<td class="num' + (r.ne ? ' ne' : '') + '">' + (r.ne || '·') + '</td>' +
+      '<td class="num">' + (nej === null ? '·' : nej) + '</td>' +
+      '<td class="num tot">' + jedno(r.soucet / r.jamky) + '</td></tr>';
+  });
+  h2 += '</tbody></table></div>';
+  h2 += '<div class="hint">Sloupec Nej je nejlepší jamka hráče, Ø je jeho průměr na jamku. Nedané jamky se do rozpisu úderů nepočítají.</div>';
+
+  return h2;
 }
 
 function scorecard(g, st) {
