@@ -610,9 +610,10 @@ function standings(game, scores) {
 
 /* ---------------------- načítání ---------------------- */
 function loadGames() {
-  S.loading = true; paint();
+  S.loading = !S.games.length; paint();
   return api('games').then(function (d) {
     S.games = d.games || [];
+    if (typeof d.rev === 'number') znamyRev = d.rev;
     LS.set('games', S.games);
     S.err = null;
   }).catch(function (e) {
@@ -622,7 +623,20 @@ function loadGames() {
 }
 
 function openGame(id, silent) {
-  if (!silent) { S.loading = true; S.view = 'game'; S.game = null; S.scores = {}; paint(); }
+  if (!silent) {
+    S.view = 'game';
+    // z paměti telefonu se hra ukáže hned, server ji pak jen doplní
+    var cache = LS.get('g:' + id, null);
+    if (cache && cache.game) {
+      S.game = cache.game;
+      S.scores = {};
+      (cache.skore || []).forEach(function (r) { S.scores[key(r.jamka, r.hrac)] = r.udery; });
+      S.loading = false;
+    } else {
+      S.loading = true; S.game = null; S.scores = {};
+    }
+    paint();
+  }
   return api('game', { id: id }).then(function (d) {
     S.game = d.game;
     var local = {};
@@ -637,19 +651,24 @@ function openGame(id, silent) {
     });
     S.scores = local;
     S.view = 'game';
+    posledniSig = podpis(local, d.game);
+    if (typeof d.rev === 'number') znamyRev = d.rev;
     LS.set('last', { game: d.game, skore: d.skore });
+    LS.set('g:' + id, { game: d.game, skore: d.skore });
     S.err = null;
     try { history.replaceState(null, '', '?game=' + encodeURIComponent(id)); } catch (e) {}
   }).catch(function (e) {
     S.err = e.message;
-    var cached = LS.get('last', null);
-    if (!silent && cached && cached.game && cached.game.id === id) {
-      S.game = cached.game;
-      S.scores = {};
-      (cached.skore || []).forEach(function (r) { S.scores[key(r.jamka, r.hrac)] = r.udery; });
-      toast('Jsi offline – ukazuju poslední uloženou verzi', true);
-    } else if (!silent) {
-      toast(e.message, true);
+    if (!silent && !S.game) {
+      var cached = LS.get('g:' + id, null) || LS.get('last', null);
+      if (cached && cached.game && cached.game.id === id) {
+        S.game = cached.game;
+        S.scores = {};
+        (cached.skore || []).forEach(function (r) { S.scores[key(r.jamka, r.hrac)] = r.udery; });
+        toast('Jsi offline – ukazuju poslední uloženou verzi', true);
+      } else {
+        toast(e.message, true);
+      }
     }
   }).then(function () { S.loading = false; paint(); });
 }
@@ -661,6 +680,73 @@ function goHome() {
   loadGames();
 }
 
+/* ---------------------- tiché načítání změn od ostatních ----------------------
+   Na server se sáhne, ale překreslí se jen tehdy, když se něco opravdu změnilo.
+   Nikdy se to nestane s otevřeným panelem ani s neodeslanými zápisy, aby
+   uživateli nic neuteklo pod rukama. */
+var posledniSig = '';
+var znamyRev = null;
+var revPodporovan = true;   // starší nasazení skriptu akci 'rev' nezná
+
+/* Zeptá se serveru jen na číslo revize – je to řádově levnější než tahat
+   celou hru. Když se nic nezměnilo, vrátí false a dál se nic nestahuje. */
+function zmenaNaServeru() {
+  if (!revPodporovan) return Promise.resolve(true);
+  return api('rev', {}, 8000).then(function (d) {
+    if (!d || typeof d.rev !== 'number') { revPodporovan = false; return true; }
+    if (znamyRev !== null && d.rev === znamyRev) return false;
+    znamyRev = d.rev;
+    return true;
+  }).catch(function () {
+    revPodporovan = false;   // stará verze skriptu – padáme zpátky na plné načtení
+    return true;
+  });
+}
+
+function podpis(mapa, game) {
+  var s = Object.keys(mapa).sort().map(function (k) { return k + ':' + mapa[k]; }).join(',');
+  return s + '|' + JSON.stringify([game.hraci, game.misto, game.datum, game.stav, game.poznamka]);
+}
+
+function autoZapnuto() { return LS.get('auto', true) !== false; }
+
+function tichyRefresh(force) {
+  if (!S.game || S.view !== 'game') return;
+  if (!force) {
+    if (!autoZapnuto()) return;
+    if (openSheet || S.queue.length || flushing || document.hidden || !S.online) return;
+  }
+  var id = S.game.id;
+  return zmenaNaServeru().then(function (zmeneno) {
+    if (!zmeneno) return false;                 // revize sedí, data ani netaháme
+    return api('game', { id: id }).then(function (d) {
+    if (!S.game || S.game.id !== id || S.view !== 'game') return;   // mezitím jsme jinde
+
+    var nove = {};
+    (d.skore || []).forEach(function (r) { nove[key(r.jamka, r.hrac)] = r.udery; });
+    // co ještě čeká na odeslání, má přednost před tím, co vrátil server
+    S.queue.forEach(function (q) {
+      if (q.action !== 'score' || q.params.id !== id) return;
+      var k = key(q.params.hole, q.params.player);
+      if (q.params.strokes === '') delete nove[k]; else nove[k] = Number(q.params.strokes);
+    });
+
+    var sig = podpis(nove, d.game);
+    if (sig === posledniSig) return false;      // nic nového – nepřekreslujeme vůbec
+
+    var pribylo = Object.keys(nove).length - Object.keys(S.scores).length;
+    posledniSig = sig;
+    if (typeof d.rev === 'number') znamyRev = d.rev;
+    S.game = d.game;
+    S.scores = nove;
+    LS.set('last', { game: d.game, skore: d.skore });
+    LS.set('g:' + id, { game: d.game, skore: d.skore });
+    S.err = null;
+    if (!openSheet) paint();
+    return pribylo;
+    });
+  }).catch(function () { /* výpadek sítě tiše ignorujeme, zkusí se znovu */ });
+}
 /* ---------------------- zápis skóre ---------------------- */
 function setScore(hole, player, strokes) {
   var g = S.game; if (!g) return;
@@ -1359,6 +1445,12 @@ function sheetSettings() {
     '<label class="f" for="g-datum">Datum hry</label><input id="g-datum" type="date" data-f="gdatum" value="' + esc(e.datum) + '">' +
     '<label class="f" for="g-misto">Kde hrajete</label><input id="g-misto" type="text" data-f="gmisto" value="' + esc(e.misto) + '">' +
     '<label class="f">Hráči a profilovky</label>' + rows +
+    '<label class="f">Synchronizace</label>' +
+    '<button class="btn ghost" data-act="toggleAuto" style="justify-content:space-between">' +
+      '<span>Sám načítat zápisy ostatních</span>' +
+      '<span style="color:' + (autoZapnuto() ? 'var(--turf)' : 'var(--ink-soft)') + ';font-weight:700">' +
+      (autoZapnuto() ? 'Zapnuto' : 'Vypnuto') + '</span></button>' +
+    '<div class="hint">Tvoje zápisy se ukládají do Sheets okamžitě vždycky. Tohle řídí jen to, jestli si appka sama stahuje, co zapsali ostatní.</div>' +
     '<div style="margin-top:16px"><button class="btn" data-act="saveGame">Uložit změny</button></div>' +
     '<div class="row" style="margin-top:10px">' +
       '<button class="btn ghost" data-act="share">Sdílet odkaz</button>' +
@@ -1461,10 +1553,21 @@ document.addEventListener('click', function (ev) {
     case 'prev': if (holeState.hole > 1) { holeState.hole--; holeState.player = firstEmptyPlayer(holeState.hole); paint({ sheetOnly: true }); } break;
     case 'next': if (holeState.hole < HOLES) { holeState.hole++; holeState.player = firstEmptyPlayer(holeState.hole); paint({ sheetOnly: true }); } break;
 
-    case 'close': openSheet = null; editState = null; paint(); break;
-    case 'close-bg': openSheet = null; editState = null; paint(); break;
+    case 'close':
+    case 'close-bg':
+      var bylaJamka = (openSheet === sheetHole);
+      openSheet = null; editState = null; paint();
+      if (bylaJamka) poZavreniJamky();
+      break;
 
     case 'settings': editState = null; openSheet = sheetSettings; paint(); break;
+    case 'toggleAuto':
+      readEditForm();
+      LS.set('auto', !autoZapnuto());
+      toast(autoZapnuto() ? 'Zápisy ostatních se budou načítat samy' : 'Automatické načítání vypnuto');
+      paint({ sheetOnly: true });
+      break;
+
     case 'saveGame': saveGameEdits(); break;
     case 'finish': setStav('finished'); break;
     case 'reopen': setStav('active'); break;
@@ -1480,9 +1583,24 @@ function refreshGame() {
     flush();
     return;
   }
-  var id = S.game.id;
   toast('Načítám z Google Sheets…');
-  openGame(id, true).then(function () { toast('Aktualizováno'); });
+  Promise.resolve(tichyRefresh(true)).then(function (zmena) {
+    toast(zmena === false ? 'Vše je aktuální' : 'Aktualizováno');
+  });
+}
+
+/* Po zavření jamky: nejdřív dopošli svoje zápisy, pak stáhni cizí. */
+function poZavreniJamky() {
+  if (!autoZapnuto() || !S.game) return;
+  var pokus = 0;
+  (function cekej() {
+    if ((S.queue.length || flushing) && pokus++ < 25) { setTimeout(cekej, 300); return; }
+    Promise.resolve(tichyRefresh()).then(function (pribylo) {
+      if (typeof pribylo === 'number' && pribylo > 0) {
+        toast('Načteno ' + pribylo + ' ' + pl(pribylo, 'nový zápis', 'nové zápisy', 'nových zápisů') + ' od ostatních');
+      }
+    });
+  })();
 }
 
 function firstEmptyPlayer(hole) {
@@ -1656,8 +1774,12 @@ document.addEventListener('touchend', function (e) {
 /* Data se sama nenačítají – aktualizuje se jen tlačítkem ⟳.
    Při návratu do appky se ale dopošle to, co se neuložilo (např. kvůli výpadku signálu). */
 document.addEventListener('visibilitychange', function () {
-  if (!document.hidden) flush();
+  if (!document.hidden) { flush(); tichyRefresh(); }
 });
+
+/* Každých 10 vteřin se mrkne, jestli někdo jiný něco nezapsal.
+   Když se nic nezměnilo, neděje se vůbec nic – žádné překreslení. */
+setInterval(function () { tichyRefresh(); }, 10000);
 
 /* ---------- start ---------- */
 (function init() {
