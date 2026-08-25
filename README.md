@@ -5,35 +5,38 @@ hru vidí a může do ní zapisovat kdokoli, kdo má odkaz — na telefonu, tabl
 
 ## Co to umí
 
-- Nová hra: datum, místo, 1–12 hráčů
-- Mřížka 18 jamek — otevřít se dá kterákoli, pořadí jamek je libovolné
-- Zápis úderů velkou klávesnicí 1–10, přepínání hráčů uvnitř jamky
-- Tlačítko **Nedal** pro jamku nedanou ani na 10. pokus — počítá se za 12 bodů a všude svítí jako červené NE
-- Po zápisu appka sama skočí na dalšího hráče, kterému na jamce chybí skóre
+### Hra
+- Nová hra: datum, místo, 1–12 hráčů, obrázek ke každému hráči
+- Jednokolová nebo dvoukolová hra (dvě kola na každé jamce, vítězí součet obou)
+- Našeptávání jmen z minulých her a tlačítko „hrát znovu se stejnou partou"
+- Mřížka 18 jamek, otevřít se dá kterákoli, pořadí jamek je libovolné
+- Klávesnice 1–10 plus tlačítko **Nedal** (jamka nedaná ani na 10. pokus = 12 bodů)
+- Po zápisu skok na dalšího hráče; po dokončení kola skok do druhého kola, pak na další jamku
+- Přejetí prstem doleva/doprava přepíná jamky
+- Ukončením se hra uzamkne a zobrazí stupně vítězů; odemknout jde přes ⋯
+
+### Přehledy
 - Průběžné pořadí podle součtu úderů (žádný par, vyhrává nejnižší číslo)
-- Karta se všemi jamkami, sloupcem NE a součtem; na telefonu otočená (jamky pod sebou)
-- Historie her — rozehrané a dohrané zvlášť, řazené podle data
-- Data se načítají jen na vyžádání tlačítkem ⟳, aby appka nic nepřepisovala během psaní
-- Funguje i bez signálu — zápisy se uloží a odešlou se, jakmile je internet zpátky
-- Sdílení odkazu na konkrétní hru (`?game=...`)
-- Přidání na plochu telefonu (PWA), světlý i tmavý režim
+- Karta se všemi jamkami; na telefonu otočená, aby se vešla bez posouvání
+- Statistiky hry: průměry, obtížnost jamek, rozpis kdo co nahrál
+- Kariéra napříč hrami: průměry, výhry, rekordy, vzájemné souboje hráč proti hráči
+- Sdílení výsledku jako obrázek do chatu, nebo odkazem na živou hru
 
-### Ovládání na mobilu
-
-- Klepnutí na jamku otevře zápis, přejetí prstem doleva/doprava přepne na sousední jamku
-- Na kartě otevřeš jamku klepnutím na její řádek
-- Tečka vpravo nahoře ukazuje stav ukládání: zelená uloženo, modrá ukládám, červená čeká na odeslání
+### Provoz
+- Zápis se ukládá do Sheets okamžitě, bez čekání na potvrzení
+- Změny ostatních se načtou po zavření jamky, každých 10 s a po návratu do appky
+- Bez signálu se zápisy schovají do fronty a odešlou samy
+- Světlý i tmavý motiv, přidání na plochu telefonu (PWA)
 
 ### Změna pravidel
 
-Na začátku `<script>` v `index.html` jsou dvě proměnné:
+Na začátku `<script>` v `index.html`:
 
 ```js
+var HOLES = 18;       // počet jamek
 var MAX_UDERU = 10;   // nejvyšší počet úderů, který jde zapsat
 var NESPLNENO = 12;   // body za jamku, kterou hráč nedal
 ```
-
-Appka se podle nich přizpůsobí, včetně popisků a klávesnice.
 
 ## Nasazení – 3 kroky
 
@@ -86,4 +89,4 @@ Za chvíli appka běží na `https://tvojejmeno.github.io/nazev-repa/`.
 - Změny v Apps Scriptu se projeví až po **Nasadit → Spravovat nasazení → Nová verze**.
 - Struktura dat:
   - list `Hry`: `id`, `datum`, `misto`, `hraci` (JSON), `par` (JSON), `maxUderu`, `stav`, `poznamka`, `vytvoreno`, `zmeneno`
-  - list `Skore`: `idHry`, `jamka`, `hrac` (index), `jmeno`, `udery`, `zmeneno`
+  - list `Skore`: `idHry`, `jamka`, `hrac` (index), `jmeno`, `udery`, `zmeneno`, `kolo`
