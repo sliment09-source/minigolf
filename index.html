@@ -26,8 +26,10 @@
   --card:#FFFFFF;
   --line:#D4DCDA;
   --tile:#FFFFFF;
-  --shadow:0 1px 0 rgba(16,34,46,.06), 0 6px 18px -10px rgba(16,34,46,.35);
-  --r:14px;
+  --shadow:0 2px 6px rgba(16,34,46,.06), 0 10px 24px -14px rgba(16,34,46,.4);
+  --r-s:12px; --r:16px; --r-l:22px;
+  --obrys:rgba(16,34,46,.05);
+  --shadow-s:0 1px 2px rgba(16,34,46,.05), 0 1px 1px rgba(16,34,46,.03);
   --display:"Anton","Haettenschweiler","Arial Narrow",system-ui,sans-serif;
   --body:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
@@ -39,9 +41,13 @@
     --turf:#49A46E; --signal:#EC5B54; --sun:#F5C43F;
     --paper:#0D1920; --card:#152430; --line:#273C4A; --tile:#152430;
     --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.8);
+    --shadow-s:0 1px 2px rgba(0,0,0,.35);
+    --obrys:rgba(255,255,255,.07);
   }
 }
 :root[data-motiv="tmavy"]{
+  --shadow-s:0 1px 2px rgba(0,0,0,.35);
+  --obrys:rgba(255,255,255,.07);
     --ink:#E8EEF1; --ink-soft:#93A7B3;
     --cobalt:#3B84D0; --cobalt-dk:#2A6AAF;
     --turf:#49A46E; --signal:#EC5B54; --sun:#F5C43F;
@@ -106,8 +112,8 @@ button{cursor:pointer;border:none;background:none}
 }
 
 /* ---------- typo ---------- */
-h2{font-family:var(--display);font-size:15px;letter-spacing:.14em;text-transform:uppercase;
-   color:var(--ink-soft);margin:26px 0 10px;font-weight:400}
+h2{font-family:var(--display);font-size:14px;letter-spacing:.16em;text-transform:uppercase;
+   color:var(--ink-soft);margin:30px 0 12px;font-weight:400}
 h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px;font-weight:400}
 
 /* ---------- buttons ---------- */
@@ -126,10 +132,12 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 
 /* ---------- cards ---------- */
 .card{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
-  padding:14px;box-shadow:var(--shadow);width:100%;text-align:left;display:block;
+  background:var(--card);border:1px solid var(--obrys);border-radius:var(--r);
+  padding:15px 16px;box-shadow:var(--shadow);width:100%;text-align:left;display:block;
+  transition:transform .12s ease;
 }
-.card+.card{margin-top:10px}
+.card:active{transform:scale(.99)}
+.card+.card{margin-top:11px}
 .card .meta{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;color:var(--ink-soft);font-size:13px}
 .tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
      padding:3px 8px;border-radius:6px;background:color-mix(in srgb,var(--turf) 16%,transparent);color:var(--turf)}
@@ -142,8 +150,9 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 @media(min-width:420px){.board{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(min-width:560px){.board{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .lb{
-  min-width:0;background:var(--card);border:1px solid var(--line);
-  border-radius:12px;padding:9px 11px;position:relative;overflow:hidden;
+  min-width:0;background:var(--card);border:1px solid var(--obrys);
+  border-radius:var(--r-s);padding:10px 12px;position:relative;overflow:hidden;
+  box-shadow:var(--shadow-s);
 }
 .lb.first{border-color:var(--cobalt);box-shadow:inset 3px 0 0 var(--cobalt)}
 .lb .pos{font-family:var(--display);font-size:12px;color:var(--ink-soft);letter-spacing:.1em}
@@ -157,7 +166,7 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 .holes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 @media(min-width:520px){.holes{grid-template-columns:repeat(6,1fr)}}
 .hole{
-  position:relative;background:var(--tile);border:1px solid var(--line);border-radius:12px;
+  position:relative;background:var(--tile);border:1px solid var(--obrys);border-radius:var(--r-s);
   padding:11px 8px 10px;overflow:hidden;text-align:center;box-shadow:var(--shadow);
   min-height:86px;display:flex;flex-direction:column;justify-content:center;
   transition:border-color .15s ease;
@@ -240,7 +249,7 @@ input[type=text],input[type=date],input[type=number],select{
 .key.wipe{font-family:var(--body);font-size:14px;font-weight:600;color:var(--ink-soft)}
 
 /* ---------- scorecard ---------- */
-.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.tablewrap{overflow-x:auto;border:1px solid var(--obrys);border-radius:var(--r);background:var(--card);box-shadow:var(--shadow-s)}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:8px 9px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
 thead th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
@@ -295,16 +304,17 @@ tr.win td.sticky{color:var(--cobalt)}
 .pod.p1 .ava{box-shadow:0 0 0 3px #F2B417}
 
 .rest{margin-top:14px;display:flex;flex-direction:column;gap:8px}
-.restrow{display:flex;align-items:center;gap:10px;background:var(--card);
-  border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.restrow{display:flex;align-items:center;gap:11px;background:var(--card);
+  border:1px solid var(--obrys);border-radius:var(--r-s);padding:11px 13px;box-shadow:var(--shadow-s)}
 .restrow .r{font-family:var(--display);color:var(--ink-soft);min-width:24px;text-align:center}
 .restrow .nm{flex:1;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .restrow .sc{font-family:var(--display);font-size:20px}
 .restrow .sub{font-size:11px;color:var(--ink-soft);margin-left:6px}
 
 .locknote{
-  display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);
-  border-radius:12px;padding:11px 13px;color:var(--ink-soft);font-size:13px;margin-top:10px;
+  display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--obrys);
+  border-radius:var(--r-s);padding:12px 14px;color:var(--ink-soft);font-size:13px;margin-top:12px;
+  box-shadow:var(--shadow-s);
 }
 .hole.locked{opacity:.85}
 
@@ -327,13 +337,13 @@ tr.win td.sticky{color:var(--cobalt)}
 /* ---------- statistiky ---------- */
 .statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 @media(min-width:480px){.statgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;box-shadow:var(--shadow);min-width:0}
+.stat{background:var(--card);border:1px solid var(--obrys);border-radius:var(--r-s);padding:12px 13px;box-shadow:var(--shadow-s);min-width:0}
 .stat .v{font-family:var(--display);font-size:25px;line-height:1.05}
 .stat .k{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
 .stat .s{font-size:11px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.barrow{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);
-  border-radius:12px;padding:9px 11px;margin-bottom:8px}
+.barrow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--obrys);
+  border-radius:var(--r-s);padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow-s)}
 .barrow .nm{font-weight:600;flex:0 0 76px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
 .barrow .track{flex:1;height:9px;border-radius:999px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden;min-width:30px}
 .barrow .fillb{height:100%;border-radius:999px;background:var(--cobalt);transition:width .3s ease}
@@ -341,7 +351,7 @@ tr.win td.sticky{color:var(--cobalt)}
 .barrow .v{font-family:var(--display);font-size:19px;min-width:42px;text-align:right}
 
 .holebars{display:flex;align-items:flex-end;gap:3px;height:118px;background:var(--card);
-  border:1px solid var(--line);border-radius:12px;padding:10px 7px 8px}
+  border:1px solid var(--obrys);border-radius:var(--r-s);padding:12px 9px 9px;box-shadow:var(--shadow-s)}
 .hb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px}
 .hb .b{width:100%;border-radius:3px 3px 0 0;background:var(--cobalt);min-height:2px}
 .hb.max .b{background:var(--signal)}
@@ -353,6 +363,48 @@ td .ace{color:var(--sun);font-weight:700}
 td .ne{color:var(--signal);font-weight:700}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft);margin-top:7px}
 .legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px}
+
+.ico{flex:none;display:block}
+.btn .ico{opacity:.9}
+.iconbtn .ico{opacity:.75}
+.rekico{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;
+  background:color-mix(in srgb,var(--cobalt) 12%,transparent);color:var(--cobalt);flex:none}
+.medaile{display:block}
+/* ---------- nové vizuální prvky ---------- */
+.hlava2{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:30px 0 12px}
+.prsten{position:relative;display:inline-grid;place-items:center;color:var(--cobalt);flex:none}
+.prsten b{position:absolute;font-family:var(--display);font-size:12px;font-weight:400;color:var(--ink)}
+.prsten b::after{content:"%";font-size:8px;opacity:.55;margin-left:1px}
+
+.kostra{background:var(--card);border:1px solid var(--obrys);border-radius:var(--r);
+  padding:15px 16px;box-shadow:var(--shadow-s);margin-bottom:11px}
+.kl{border-radius:6px;background:linear-gradient(90deg,
+  color-mix(in srgb,var(--ink) 7%,transparent) 25%,
+  color-mix(in srgb,var(--ink) 12%,transparent) 37%,
+  color-mix(in srgb,var(--ink) 7%,transparent) 63%);
+  background-size:400% 100%;animation:preblik 1.4s ease infinite}
+@keyframes preblik{0%{background-position:100% 0}100%{background-position:0 0}}
+
+.konfety{position:fixed;inset:0;z-index:95;pointer-events:none}
+.prazdno{color:var(--ink-soft)}
+
+.grabber{width:42px;height:4px;border-radius:99px;background:var(--line);
+  margin:2px auto 12px;flex:none}
+
+.hole.rozehrana{border-color:color-mix(in srgb,var(--cobalt) 45%,transparent)}
+.hole.rozehrana::after{
+  content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;
+  box-shadow:0 0 0 0 color-mix(in srgb,var(--cobalt) 55%,transparent);
+  animation:pulz 2.4s ease-out infinite;
+}
+@keyframes pulz{
+  0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--cobalt) 45%,transparent)}
+  70%{box-shadow:0 0 0 7px transparent}
+  100%{box-shadow:0 0 0 0 transparent}
+}
+@media (prefers-reduced-motion:reduce){
+  .hole.rozehrana::after,.kl{animation:none}
+}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
@@ -563,6 +615,52 @@ function toast(msg, bad) {
 function pl(n, one, few, many) { return n === 1 ? one : (n >= 2 && n <= 4 ? few : many); }
 function isNe(v) { return v === NESPLNENO; }
 function fmt(v) { return isNe(v) ? 'NE' : v; }
+
+/* ---------------------- ikony ----------------------
+   Jednotná sada tenkých ikon. Emoji vypadají na každém systému jinak
+   a nikdy nesednou k typografii, tohle se kreslí barvou textu. */
+var IKONY = {
+  zpet: '<path d="M15 5l-7 7 7 7"/>',
+  vpred: '<path d="M9 5l7 7-7 7"/>',
+  zavrit: '<path d="M6 6l12 12M18 6L6 18"/>',
+  nastaveni: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  obnovit: '<path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/>',
+  vic: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+  tuzka: '<path d="M4 20h4L20 8l-4-4L4 16v4z"/>',
+  foto: '<rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8.5 7l1.5-3h4l1.5 3"/><circle cx="12" cy="13.5" r="3.5"/>',
+  odkaz: '<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>',
+  zamek: '<rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  pohar: '<path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v1a4 4 0 0 0 3 3.8M17 6h3v1a4 4 0 0 1-3 3.8"/><path d="M12 14v4M9 20h6"/>',
+  hvezda: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/>',
+  plamen: '<path d="M12 3s5 4.2 5 9a5 5 0 0 1-10 0c0-2 1-3.5 1-3.5S9 11 10.5 11C10.5 8 12 3 12 3z"/>',
+  graf: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  fajfka: '<path d="M4 12.5l5.5 5.5L20 6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  kos: '<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/>',
+  hraci: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.9M18 14.8c2 .8 3 2.6 3 5.2"/>'
+};
+
+function ico(nazev, size, sirka) {
+  var d = IKONY[nazev];
+  if (!d) return '';
+  var s = size || 20;
+  return '<svg class="ico" viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" ' +
+    'stroke="currentColor" stroke-width="' + (sirka || 1.8) + '" stroke-linecap="round" stroke-linejoin="round" ' +
+    'aria-hidden="true">' + d + '</svg>';
+}
+
+/* Medaile na stupních vítězů – kolečko se stužkou, ne emoji. */
+function medaile(misto) {
+  var barvy = { 1: ['#F7C63A', '#D69B08'], 2: ['#CFD8DE', '#93A4B0'], 3: ['#D5915B', '#A96A38'] };
+  var b = barvy[misto] || barvy[3];
+  return '<svg class="medaile" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">' +
+    '<path d="M8 2l3 7H7L4.5 3.5z" fill="' + b[1] + '"/>' +
+    '<path d="M16 2l-3 7h4l2.5-5.5z" fill="' + b[1] + '"/>' +
+    '<circle cx="12" cy="15" r="7" fill="' + b[0] + '" stroke="' + b[1] + '" stroke-width="1.5"/>' +
+    '<text x="12" y="18.6" text-anchor="middle" font-size="8" font-weight="700" fill="' + b[1] + '" ' +
+    'font-family="Archivo, sans-serif">' + misto + '</text>' +
+  '</svg>';
+}
 
 /* ---------------------- profilovky ---------------------- */
 /* Přiřazení obrázků k hráčům se veze v poznámce hry jako JSON, aby nebylo
@@ -801,13 +899,146 @@ function paint(opts) {
   if (afterPaint) { var f = afterPaint; afterPaint = null; f(); }
 }
 
+/* ---------- animace pořadí ----------
+   Kartičky se po překreslení plynule přesunou na nové místo (technika FLIP)
+   a součty se napočítají, místo aby skokem přeblikly. */
+var predchoziPozice = {};
+var predchoziSoucty = {};
+
+function chceAnimace() {
+  return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+function zmerPoradi(root) {
+  predchoziPozice = {};
+  Array.prototype.forEach.call(root.querySelectorAll('[data-lb]'), function (el) {
+    predchoziPozice[el.getAttribute('data-lb')] = el.getBoundingClientRect();
+  });
+}
+
+function animujPoradi(root) {
+  var prvky = root.querySelectorAll('[data-lb]');
+  if (!prvky.length) return;
+
+  Array.prototype.forEach.call(prvky, function (el) {
+    var id = el.getAttribute('data-lb');
+
+    if (chceAnimace() && el.animate) {
+      var stara = predchoziPozice[id];
+      if (stara) {
+        var nova = el.getBoundingClientRect();
+        var dx = stara.left - nova.left, dy = stara.top - nova.top;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+          el.animate(
+            [{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }],
+            { duration: 420, easing: 'cubic-bezier(.2,.8,.25,1)' }
+          );
+        }
+      }
+    }
+
+    // napočítání součtu
+    var cil = el.querySelector('[data-pocitadlo]');
+    if (!cil) return;
+    var nove = Number(cil.getAttribute('data-pocitadlo'));
+    var stare = predchoziSoucty[id];
+    predchoziSoucty[id] = nove;
+    if (!chceAnimace() || stare === undefined || stare === nove || isNaN(nove)) return;
+    napocitej(cil, stare, nove, 420);
+  });
+}
+
+function napocitej(el, od, na, doba) {
+  var start = null;
+  function krok(t) {
+    if (start === null) start = t;
+    var p = Math.min(1, (t - start) / doba);
+    var e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(od + (na - od) * e);
+    if (p < 1) requestAnimationFrame(krok);
+  }
+  requestAnimationFrame(krok);
+}
+
+/* ---------- prstenec postupu ---------- */
+function prstenec(hotovo, celkem, velikost) {
+  var v = velikost || 40;
+  var r = (v - 5) / 2;
+  var obvod = 2 * Math.PI * r;
+  var podil = celkem ? Math.min(1, hotovo / celkem) : 0;
+  return '<span class="prsten" title="' + hotovo + ' z ' + celkem + '">' +
+    '<svg viewBox="0 0 ' + v + ' ' + v + '" width="' + v + '" height="' + v + '" aria-hidden="true">' +
+      '<circle cx="' + v / 2 + '" cy="' + v / 2 + '" r="' + r + '" fill="none" stroke="currentColor" ' +
+        'stroke-width="3.5" opacity=".16"/>' +
+      '<circle cx="' + v / 2 + '" cy="' + v / 2 + '" r="' + r + '" fill="none" stroke="currentColor" ' +
+        'stroke-width="3.5" stroke-linecap="round" stroke-dasharray="' + obvod.toFixed(1) + '" ' +
+        'stroke-dashoffset="' + (obvod * (1 - podil)).toFixed(1) + '" ' +
+        'transform="rotate(-90 ' + v / 2 + ' ' + v / 2 + ')"/>' +
+    '</svg>' +
+    '<b class="num">' + Math.round(podil * 100) + '</b>' +
+  '</span>';
+}
+
+/* ---------- konfety při vyhlášení ---------- */
+function konfety() {
+  if (!chceAnimace()) return;
+  var c = document.createElement('canvas');
+  c.className = 'konfety';
+  var w = c.width = window.innerWidth;
+  var h = c.height = window.innerHeight;
+  document.body.appendChild(c);
+  var ctx = c.getContext('2d');
+  var barvy = ['#F7C63A', '#2E7D4F', '#14508C', '#D3312B', '#CFD8DE'];
+  var kusy = [];
+  for (var i = 0; i < 110; i++) {
+    kusy.push({
+      x: Math.random() * w, y: -20 - Math.random() * h * 0.5,
+      vx: (Math.random() - 0.5) * 2.2, vy: 2.5 + Math.random() * 3.5,
+      s: 5 + Math.random() * 7, rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.25,
+      barva: barvy[i % barvy.length]
+    });
+  }
+  var start = performance.now();
+  (function krok(t) {
+    var ubehlo = t - start;
+    ctx.clearRect(0, 0, w, h);
+    kusy.forEach(function (k) {
+      k.x += k.vx; k.y += k.vy; k.rot += k.vr; k.vy += 0.03;
+      ctx.save();
+      ctx.translate(k.x, k.y);
+      ctx.rotate(k.rot);
+      ctx.globalAlpha = ubehlo > 2200 ? Math.max(0, 1 - (ubehlo - 2200) / 800) : 1;
+      ctx.fillStyle = k.barva;
+      ctx.fillRect(-k.s / 2, -k.s / 4, k.s, k.s / 2);
+      ctx.restore();
+    });
+    if (ubehlo < 3000) requestAnimationFrame(krok);
+    else c.remove();
+  })(start);
+}
+
+/* ---------- kostry při načítání ---------- */
+function kostry(kolik) {
+  var h = '';
+  for (var i = 0; i < (kolik || 3); i++) {
+    h += '<div class="kostra">' +
+      '<div class="kl" style="width:' + (45 + i * 7) + '%;height:19px"></div>' +
+      '<div class="kl" style="width:62%;height:12px;margin-top:10px"></div>' +
+      '<div class="kl" style="width:38%;height:12px;margin-top:8px"></div>' +
+    '</div>';
+  }
+  return h;
+}
+
 function renderRoot() {
   var root = document.getElementById('root');
   var stary = root.querySelector('.board');
   var posun = stary ? stary.scrollLeft : 0;
+  zmerPoradi(root);
   root.innerHTML = S.view === 'game' ? viewGame() : (S.view === 'career' ? viewKariera() : viewHome());
   var novy = root.querySelector('.board');
   if (novy && posun) novy.scrollLeft = posun;
+  animujPoradi(root);
 }
 
 function renderOverlay() {
@@ -855,14 +1086,14 @@ function viewHome() {
        '<div class="grow"><div class="brand">Mini<span>golf</span></div>' +
        '<div class="subtle">18 jamek · zápis skóre</div></div>' +
        syncPill() +
-       '<button class="iconbtn" data-act="api" aria-label="Adresa skriptu">⚙</button>' +
-       '<button class="iconbtn" data-act="reload" aria-label="Načíst znovu">⟳</button>' +
+       '<button class="iconbtn" data-act="api" aria-label="Nastavení">' + ico('nastaveni') + '</button>' +
+       '<button class="iconbtn" data-act="reload" aria-label="Načíst znovu">' + ico('obnovit') + '</button>' +
        '</div>';
 
   h += '<div class="wrap">';
-  h += '<div style="margin-top:16px"><button class="btn big" data-act="new">+ Nová hra</button></div>';
+  h += '<div style="margin-top:16px"><button class="btn big" data-act="new">' + ico('plus', 20, 2.4) + ' Nová hra</button></div>';
   if (S.games.length) {
-    h += '<div style="margin-top:10px"><button class="btn ghost" data-act="career">📊 Statistiky hráčů za celou dobu</button></div>';
+    h += '<div style="margin-top:10px"><button class="btn ghost" data-act="career">' + ico('graf') + ' Statistiky hráčů za celou dobu</button></div>';
   }
 
   if (S.err) {
@@ -874,7 +1105,7 @@ function viewHome() {
   }
 
   if (S.loading && !S.games.length) {
-    h += '<h2>Načítám</h2><div class="empty">Tahám data z Google Sheets…</div>';
+    h += '<h2>Načítám</h2>' + kostry(3);
   }
 
   if (aktivni.length) {
@@ -888,7 +1119,16 @@ function viewHome() {
   }
 
   if (!S.loading && !S.games.length && !S.err) {
-    h += '<h2>Zatím nic</h2><div class="empty">Založ první hru a zapiš první jamku.</div>';
+    h += '<h2>Zatím nic</h2><div class="empty">' +
+      '<svg viewBox="0 0 120 90" width="130" height="98" aria-hidden="true" class="prazdno">' +
+        '<ellipse cx="60" cy="78" rx="44" ry="7" fill="currentColor" opacity=".10"/>' +
+        '<path d="M74 16v56" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".45"/>' +
+        '<path d="M74 18l26 8-26 8z" fill="var(--signal)"/>' +
+        '<circle cx="40" cy="68" r="10" fill="var(--card)" stroke="currentColor" stroke-width="2.5" opacity=".55"/>' +
+        '<circle cx="37" cy="65" r="1.6" fill="currentColor" opacity=".35"/>' +
+        '<circle cx="43" cy="69" r="1.6" fill="currentColor" opacity=".35"/>' +
+      '</svg>' +
+      '<div style="margin-top:8px">Založ první hru a zapiš první jamku.</div></div>';
   }
   h += '</div>';
   return h;
@@ -928,13 +1168,13 @@ function viewGame() {
   var h = '';
 
   h += '<div class="top">' +
-       '<button class="iconbtn" data-act="home" aria-label="Zpět">←</button>' +
-       '<div class="grow"><div class="brand" style="font-size:19px">' + (hotovo ? '🔒 ' : '') + esc(g.misto || 'Minigolf') + '</div>' +
+       '<button class="iconbtn" data-act="home" aria-label="Zpět">' + ico('zpet') + '</button>' +
+       '<div class="grow"><div class="brand" style="font-size:19px">' + (hotovo ? ico('zamek', 16) + ' ' : '') + esc(g.misto || 'Minigolf') + '</div>' +
        '<div class="subtle num">' + esc(czDate(g.datum)) + ' · ' + g.hraci.length + ' ' + pl(g.hraci.length, 'hráč', 'hráči', 'hráčů') +
        (kolaHry(g) === 2 ? ' · 2 kola' : '') + (hotovo ? ' · ukončeno' : '') + '</div></div>' +
        syncPill() +
-       '<button class="iconbtn" data-act="refresh" aria-label="Načíst skóre znovu">⟳</button>' +
-       '<button class="iconbtn" data-act="settings" aria-label="Nastavení hry">⋯</button>' +
+       '<button class="iconbtn" data-act="refresh" aria-label="Načíst skóre znovu">' + ico('obnovit') + '</button>' +
+       '<button class="iconbtn" data-act="settings" aria-label="Nastavení hry">' + ico('vic') + '</button>' +
        '</div>';
 
   h += '<div class="wrap">';
@@ -942,16 +1182,24 @@ function viewGame() {
   if (hotovo) {
     h += '<h2 style="margin-top:14px">Výsledek</h2>' + podium(g, st);
   } else {
-    h += '<h2 style="margin-top:14px">Pořadí</h2><div class="board">';
+    var zapsano = 0, celkemZ = g.hraci.length * HOLES * kolaHry(g);
+    for (var hz = 1; hz <= HOLES; hz++) {
+      for (var pz = 0; pz < g.hraci.length; pz++) {
+        var kolaZ = seznamKol(g);
+        for (var kz = 0; kz < kolaZ.length; kz++) if (S.scores[key(hz, pz, kolaZ[kz])]) zapsano++;
+      }
+    }
+    h += '<div class="hlava2"><h2 style="margin:0">Pořadí</h2>' + prstenec(zapsano, celkemZ) + '</div><div class="board">';
     st.forEach(function (r, i) {
       var extra = [];
       if (r.aces) extra.push(r.aces + '× eso');
       if (r.ne) extra.push(r.ne + '× NE');
-      h += '<div class="lb' + (i === 0 && r.jamky ? ' first' : '') + '">' +
+      h += '<div class="lb' + (i === 0 && r.jamky ? ' first' : '') + '" data-lb="' + g.id + ':' + r.i + '">' +
         '<div class="lbtop">' + avaHtml(r.jmeno, avaOf(g, r.i), 34) +
           '<span class="pos">' + (r.jamky ? r.poradi + '.' : '–') + '</span></div>' +
         '<div class="nm">' + esc(r.jmeno) + '</div>' +
-        '<div class="tot num">' + (r.jamky ? r.soucet : '–') + '</div>' +
+        '<div class="tot num"' + (r.jamky ? ' data-pocitadlo="' + r.soucet + '"' : '') + '>' +
+          (r.jamky ? r.soucet : '–') + '</div>' +
         '<div class="thru num">' + r.jamky + '/' + (HOLES * kolaHry(g)) + (kolaHry(g) === 2 ? ' zápisů' : ' jamek') + (extra.length ? ' · ' + extra.join(' · ') : '') + '</div>' +
       '</div>';
     });
@@ -971,7 +1219,8 @@ function viewGame() {
       }
       var celkem = g.hraci.length * kolaJ.length;
       var pct = Math.round(filled / celkem * 100);
-      h += '<button class="hole' + (filled === celkem ? ' done' : '') + (hotovo ? ' locked' : '') + '" data-act="' + (hotovo ? 'locked' : 'hole') + '" data-hole="' + hole + '" style="--fill:' + pct + '%">' +
+      var rozehrana = (!hotovo && filled > 0 && filled < celkem);
+      h += '<button class="hole' + (filled === celkem ? ' done' : '') + (rozehrana ? ' rozehrana' : '') + (hotovo ? ' locked' : '') + '" data-act="' + (hotovo ? 'locked' : 'hole') + '" data-hole="' + hole + '" style="--fill:' + pct + '%">' +
         '<span class="fill"></span>' +
         '<span class="hnum num">' + (hole < 10 ? '0' : '') + hole + '</span>' +
         '<span class="par num">' + filled + '/' + celkem + '</span>' +
@@ -980,7 +1229,7 @@ function viewGame() {
     }
     h += '</div>';
     h += hotovo
-      ? '<div class="locknote">🔒 Hra je ukončená, skóre už nejde měnit. Odemkneš ji přes ⋯ → Znovu otevřít.</div>'
+      ? '<div class="locknote">' + ico('zamek', 18) + ' Hra je ukončená, skóre už nejde měnit. Odemkneš ji přes nabídku → Znovu otevřít.</div>'
       : '<div class="hint">Klepni na jamku a zapiš údery. Jamky můžeš vyplňovat v libovolném pořadí.</div>';
   } else if (S.tab === 'stats') {
     h += '<h2>Statistiky</h2>' + statistiky(g, st);
@@ -1014,14 +1263,13 @@ function podium(g, st) {
   var poradiNaStupni = top.length >= 3 ? [top[1], top[0], top[2]]
                      : top.length === 2 ? [top[1], top[0]]
                      : [top[0]];
-  var medaile = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
   var h = '<div class="podium">';
   poradiNaStupni.forEach(function (r) {
     var m = Number(r.poradi);
     var cls = (m >= 1 && m <= 3) ? 'p' + m : 'p3';
     h += '<div class="pod ' + cls + '">' +
-      '<div class="medal">' + (medaile[m] || '') + '</div>' +
+      '<div class="medal">' + medaile(m) + '</div>' +
       avaHtml(r.jmeno, avaOf(g, r.i), 54) +
       '<div class="nm">' + esc(r.jmeno) + '</div>' +
       '<div class="sc num">' + r.soucet + '</div>' +
@@ -1031,7 +1279,7 @@ function podium(g, st) {
   });
   h += '</div>';
 
-  h += '<div style="margin-top:14px"><button class="btn" data-act="shareImg">📸 Sdílet výsledek jako obrázek</button></div>';
+  h += '<div style="margin-top:14px"><button class="btn" data-act="shareImg">' + ico('foto') + ' Sdílet výsledek jako obrázek</button></div>';
 
   var zbytek = hrani.slice(3).concat(st.filter(function (r) { return r.jamky === 0; }));
   if (zbytek.length) {
@@ -1177,8 +1425,8 @@ function sheetHrac() {
     .sort(function (a, b) { return b.spolu - a.spolu; });
 
   var h = '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Hráč">' +
-    '<div class="sheet-head">' +
-      '<button class="iconbtn" data-act="close" aria-label="Zavřít">✕</button>' +
+    '<div class="grabber"></div><div class="sheet-head">' +
+      '<button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button>' +
       '<div class="t" style="display:flex;align-items:center;gap:10px">' +
         avaHtml(x.jmeno, x.avatar, 38) + esc(x.jmeno) + '</div>' +
     '</div>' +
@@ -1228,10 +1476,10 @@ function viewKariera() {
   var h = '';
 
   h += '<div class="top">' +
-       '<button class="iconbtn" data-act="home" aria-label="Zpět">←</button>' +
+       '<button class="iconbtn" data-act="home" aria-label="Zpět">' + ico('zpet') + '</button>' +
        '<div class="grow"><div class="brand" style="font-size:19px">Kariéra</div>' +
        '<div class="subtle">' + S.games.length + ' ' + pl(S.games.length, 'hra', 'hry', 'her') + ' v historii</div></div>' +
-       '<button class="iconbtn" data-act="reload" aria-label="Načíst znovu">⟳</button>' +
+       '<button class="iconbtn" data-act="reload" aria-label="Načíst znovu">' + ico('obnovit') + '</button>' +
        '</div>';
 
   h += '<div class="wrap">';
@@ -1256,19 +1504,19 @@ function viewKariera() {
   if (r.nejKolo || r.nejEsa || r.nejSerie) {
     h += '<h2>Rekordy</h2>';
     if (r.nejKolo) {
-      h += '<div class="restrow"><span style="font-size:19px">🏆</span>' +
+      h += '<div class="restrow"><span class="rekico">' + ico('pohar', 20) + '</span>' +
         '<span class="nm">Nejlepší kolo<br><span class="sub">' + esc(r.nejKolo.jmeno) +
         (r.nejKolo.misto ? ' · ' + esc(r.nejKolo.misto) : '') + ' · ' + esc(czDate(r.nejKolo.datum)) + '</span></span>' +
         '<span class="sc num">' + r.nejKolo.soucet + '</span></div>';
     }
     if (r.nejEsa) {
-      h += '<div class="restrow"><span style="font-size:19px">⭐</span>' +
+      h += '<div class="restrow"><span class="rekico">' + ico('hvezda', 20) + '</span>' +
         '<span class="nm">Nejvíc es v jedné hře<br><span class="sub">' + esc(r.nejEsa.jmeno) +
         ' · ' + esc(czDate(r.nejEsa.datum)) + '</span></span>' +
         '<span class="sc num">' + r.nejEsa.esa + '</span></div>';
     }
     if (r.nejSerie) {
-      h += '<div class="restrow"><span style="font-size:19px">🔥</span>' +
+      h += '<div class="restrow"><span class="rekico">' + ico('plamen', 20) + '</span>' +
         '<span class="nm">Nejdelší série výher<br><span class="sub">' + esc(r.nejSerie.jmeno) + '</span></span>' +
         '<span class="sc num">' + r.nejSerie.delka + '×</span></div>';
     }
@@ -1712,8 +1960,8 @@ function cardFooter(g) {
     'NE = jamka nedaná ani na ' + MAX_UDERU + '. pokus, počítá se za ' + NESPLNENO + ' bodů.' +
     (isNarrow() && !hotovo ? ' Klepnutím na řádek jamky ji rovnou otevřeš.' : '') + '</div>' +
     '<div class="row" style="margin-top:12px">' +
-    '<button class="btn ghost" data-act="shareImg">📸 Obrázek</button>' +
-    '<button class="btn ghost" data-act="share">Odkaz</button>' +
+    '<button class="btn ghost" data-act="shareImg">' + ico('foto', 18) + ' Obrázek</button>' +
+    '<button class="btn ghost" data-act="share">' + ico('odkaz', 18) + ' Odkaz</button>' +
     '<button class="btn ' + (hotovo ? 'ghost' : '') + '" data-act="' + (hotovo ? 'reopen' : 'finish') + '">' +
     (hotovo ? 'Znovu otevřít' : 'Ukončit a vyhlásit') + '</button></div>';
 }
@@ -1734,7 +1982,7 @@ function sheetHole() {
       var hotovo = koloKompletni(hole, k);
       return '<button class="tab' + (k === ko ? ' on' : '') + '" data-act="setKolo" data-k="' + k + '" ' +
         'style="border-color:var(--line);background:var(--card)">' + k + '. kolo' +
-        (hotovo ? ' <span style="color:var(--turf)">✓</span>' : '') + '</button>';
+        (hotovo ? ' <span style="color:var(--turf)">' + ico('fajfka', 14, 2.6) + '</span>' : '') + '</button>';
     }).join('') + '</div>';
   }
 
@@ -1755,11 +2003,11 @@ function sheetHole() {
   var popisKola = kola.length > 1 ? ' v ' + ko + '. kole' : '';
 
   return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Jamka ' + hole + '">' +
-    '<div class="sheet-head">' +
-      '<button class="iconbtn" data-act="prev" ' + (hole === 1 ? 'disabled style="opacity:.4"' : '') + ' aria-label="Předchozí jamka">←</button>' +
+    '<div class="grabber"></div><div class="sheet-head">' +
+      '<button class="iconbtn" data-act="prev" ' + (hole === 1 ? 'disabled style="opacity:.4"' : '') + ' aria-label="Předchozí jamka">' + ico('zpet') + '</button>' +
       '<div class="t" style="text-align:center">Jamka ' + (hole < 10 ? '0' : '') + hole + '</div>' +
-      '<button class="iconbtn" data-act="next" ' + (hole === HOLES ? 'disabled style="opacity:.4"' : '') + ' aria-label="Další jamka">→</button>' +
-      '<button class="iconbtn" data-act="close" aria-label="Zavřít">✕</button>' +
+      '<button class="iconbtn" data-act="next" ' + (hole === HOLES ? 'disabled style="opacity:.4"' : '') + ' aria-label="Další jamka">' + ico('vpred') + '</button>' +
+      '<button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button>' +
     '</div>' +
     prepinac +
     '<div class="pchips">' + chips + '</div>' +
@@ -1799,8 +2047,8 @@ function sheetAva() {
   }
 
   return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Výběr obrázku">' +
-    '<div class="sheet-head">' +
-      '<button class="iconbtn" data-act="backFromAva" aria-label="Zpět">←</button>' +
+    '<div class="grabber"></div><div class="sheet-head">' +
+      '<button class="iconbtn" data-act="backFromAva" aria-label="Zpět">' + ico('zpet') + '</button>' +
       '<div class="t">' + (jm ? esc(jm) : 'Obrázek hráče') + '</div>' +
     '</div>' +
     '<div class="avagrid">' + g + '</div>' +
@@ -1838,12 +2086,12 @@ function sheetNew() {
       avaVyber(jm, i, sel, 'new') +
       '<input type="text" data-f="hrac" data-i="' + i + '" value="' + esc(jm) + '" placeholder="Jméno hráče" autocomplete="off"' +
         (znami.length ? ' list="znami-hraci"' : '') + '>' +
-      (f.hraci.length > 1 ? '<button class="rm" data-act="rmp" data-i="' + i + '" aria-label="Odebrat hráče">✕</button>' : '') +
+      (f.hraci.length > 1 ? '<button class="rm" data-act="rmp" data-i="' + i + '" aria-label="Odebrat hráče">' + ico('zavrit', 18) + '</button>' : '') +
     '</div>';
   }).join('');
 
   return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Nová hra">' +
-    '<div class="sheet-head"><div class="t">Nová hra</div><button class="iconbtn" data-act="close" aria-label="Zavřít">✕</button></div>' +
+    '<div class="grabber"></div><div class="sheet-head"><div class="t">Nová hra</div><button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button></div>' +
     navrhy + sestavyHtml +
     '<label class="f" for="f-datum">Datum hry</label>' +
     '<input id="f-datum" type="date" data-f="datum" value="' + esc(f.datum) + '">' +
@@ -1860,7 +2108,7 @@ function sheetNew() {
     '<label class="f">Hráči a obrázky</label>' +
     '<div class="hint" style="margin:-2px 2px 10px">Napiš jméno a klepni na kolečko vlevo – vyskočí okno s obrázky na výběr.' +
       (znami.length ? ' U jmen se ti nabízí hráči z minulých her, ať sedí statistiky.' : '') + '</div>' + rows +
-    (f.hraci.length < 12 ? '<button class="btn ghost" data-act="addp" style="margin-top:2px">+ Přidat hráče</button>' : '') +
+    (f.hraci.length < 12 ? '<button class="btn ghost" data-act="addp" style="margin-top:2px">' + ico('plus', 18) + ' Přidat hráče</button>' : '') +
     '<div style="margin-top:18px"><button class="btn big" data-act="create">Založit hru</button></div>' +
     '<div class="hint">Počítají se jen údery, 1 až ' + MAX_UDERU + '. Kdo jamku nedá ani na ' + MAX_UDERU + '. pokus, dostane ' + NESPLNENO + ' bodů.</div>' +
   '</div></div>';
@@ -1885,7 +2133,7 @@ function sheetApi() {
   }).join('');
 
   return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Nastavení">' +
-    '<div class="sheet-head"><div class="t">Nastavení</div><button class="iconbtn" data-act="close" aria-label="Zavřít">✕</button></div>' +
+    '<div class="grabber"></div><div class="sheet-head"><div class="t">Nastavení</div><button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button></div>' +
     '<label class="f" style="margin-top:0">Vzhled</label>' +
     '<div class="row" style="gap:8px">' + prep + '</div>' +
     '<div class="hint">Tmavý motiv se hodí na večerní hraní. „Podle systému" se řídí nastavením telefonu.</div>' +
@@ -1934,7 +2182,7 @@ function sheetSettings() {
         '<span class="nm">' + esc(jm) + '</span></div>';
     }).join('');
     return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Ukončená hra">' +
-      '<div class="sheet-head"><div class="t">🔒 Ukončená hra</div><button class="iconbtn" data-act="close" aria-label="Zavřít">✕</button></div>' +
+      '<div class="grabber"></div><div class="sheet-head"><div class="t">' + ico('zamek', 20) + ' Ukončená hra</div><button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button></div>' +
       '<div class="locknote" style="margin-top:0">Hra je uzamčená, aby do výsledku už nikdo nesáhl. Chceš-li něco opravit, nejdřív ji znovu otevři.</div>' +
       '<label class="f">Kde a kdy</label>' +
       '<div class="restrow"><span class="nm">' + esc(g.misto || 'Minigolf') + '</span><span class="sc num" style="font-size:15px">' + esc(czDate(g.datum)) + '</span></div>' +
@@ -1943,7 +2191,7 @@ function sheetSettings() {
         '<button class="btn ghost" data-act="share">Sdílet odkaz</button>' +
         '<button class="btn" data-act="reopen">Znovu otevřít</button>' +
       '</div>' +
-      '<div style="margin-top:10px"><button class="btn danger" data-act="del">Smazat hru</button></div>' +
+      '<div style="margin-top:10px"><button class="btn danger" data-act="del">' + ico('kos', 18) + ' Smazat hru</button></div>' +
       '<div class="hint">Smazání odstraní hru i její skóre z Google Sheets. Nejde vrátit zpět.</div>' +
     '</div></div>';
   }
@@ -1966,7 +2214,7 @@ function sheetSettings() {
   }).join('');
 
   return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Nastavení hry">' +
-    '<div class="sheet-head"><div class="t">Upravit hru</div><button class="iconbtn" data-act="close" aria-label="Zavřít">✕</button></div>' +
+    '<div class="grabber"></div><div class="sheet-head"><div class="t">Upravit hru</div><button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button></div>' +
     '<label class="f" for="g-datum">Datum hry</label><input id="g-datum" type="date" data-f="gdatum" value="' + esc(e.datum) + '">' +
     '<label class="f" for="g-misto">Kde hrajete</label><input id="g-misto" type="text" data-f="gmisto" value="' + esc(e.misto) + '">' +
     '<label class="f">Hráči a profilovky</label>' + rows +
@@ -1981,7 +2229,7 @@ function sheetSettings() {
       '<button class="btn ghost" data-act="share">Sdílet odkaz</button>' +
       '<button class="btn ghost" data-act="' + (g.stav === 'finished' ? 'reopen' : 'finish') + '">' + (g.stav === 'finished' ? 'Znovu otevřít' : 'Ukončit hru') + '</button>' +
     '</div>' +
-    '<div style="margin-top:10px"><button class="btn danger" data-act="del">Smazat hru</button></div>' +
+    '<div style="margin-top:10px"><button class="btn danger" data-act="del">' + ico('kos', 18) + ' Smazat hru</button></div>' +
     '<div class="hint">Smazání odstraní hru i její skóre z Google Sheets. Nejde vrátit zpět.</div>' +
   '</div></div>';
 }
@@ -2086,7 +2334,7 @@ document.addEventListener('click', function (ev) {
       openSheet = sheetHole; paint(); break;
 
     case 'locked':
-      toast('Hra je ukončená. Odemkneš ji přes ⋯ → Znovu otevřít.', true);
+      toast('Hra je ukončená. Odemkneš ji přes nabídku vpravo nahoře.', true);
       break;
 
     case 'pick': holeState.player = Number(t.getAttribute('data-p')); paint({ sheetOnly: true }); break;
@@ -2313,6 +2561,7 @@ function setStav(stav) {
   openSheet = null; editState = null;
   if (stav === 'finished') S.tab = 'holes';
   paint();
+  if (stav === 'finished') konfety();
   api('updateGame', { id: g.id, payload: { stav: stav } })
     .then(function () { toast(stav === 'finished' ? 'Hra ukončena a uzamčena' : 'Hra znovu otevřena'); })
     .catch(function (e) { toast(e.message, true); });
@@ -2358,6 +2607,37 @@ document.addEventListener('keydown', function (e) {
   } else if (openSheet && e.key === 'Escape') { openSheet = null; paint(); }
 });
 
+/* ---------- zavření panelu tažením za úchyt ---------- */
+(function () {
+  var zacatek = null, panel = null;
+  document.addEventListener('touchstart', function (e) {
+    if (!openSheet) return;
+    var g = e.target.closest && e.target.closest('.grabber, .sheet-head');
+    if (!g) return;
+    if (e.target.closest('button')) return;
+    panel = document.querySelector('.sheet-in');
+    zacatek = e.changedTouches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function (e) {
+    if (zacatek === null || !panel) return;
+    var d = e.changedTouches[0].clientY - zacatek;
+    panel.style.transform = d > 0 ? 'translateY(' + d + 'px)' : 'none';
+  }, { passive: true });
+
+  document.addEventListener('touchend', function (e) {
+    if (zacatek === null || !panel) return;
+    var d = e.changedTouches[0].clientY - zacatek;
+    var byloJamka = (openSheet === sheetHole);
+    panel.style.transform = '';
+    zacatek = null; panel = null;
+    if (d > 110) {
+      openSheet = null; editState = null; paint();
+      if (byloJamka) poZavreniJamky();
+    }
+  }, { passive: true });
+})();
+
 /* ---------- přejetí prstem mezi jamkami ---------- */
 var swipeX = null, swipeY = null;
 document.addEventListener('touchstart', function (e) {
@@ -2382,7 +2662,7 @@ document.addEventListener('touchend', function (e) {
 }, { passive: true });
 
 /* ---------- odesílání čekajících zápisů ---------- */
-/* Data se sama nenačítají – aktualizuje se jen tlačítkem ⟳.
+/* Data se sama nenačítají – aktualizuje se jen tlačítkem obnovení.
    Při návratu do appky se ale dopošle to, co se neuložilo (např. kvůli výpadku signálu). */
 document.addEventListener('visibilitychange', function () {
   if (!document.hidden) { flush(); tichyRefresh(); }
