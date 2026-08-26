@@ -5,27 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Minigolf – skóre</title>
 <meta name="description" content="Zápis skóre na 18 jamek, průběžné pořadí a historie her.">
-<meta name="theme-color" content="#14508C">
+<meta name="theme-color" content="#0F6B45">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Minigolf">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2314508C'/><circle cx='50' cy='62' r='16' fill='%23F7F9F7'/><rect x='44' y='16' width='7' height='40' fill='%23F7F9F7'/><path d='M51 18 L78 26 L51 34 Z' fill='%23D3312B'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230F6B45'/><circle cx='50' cy='62' r='16' fill='%23F7F9F7'/><rect x='44' y='16' width='7' height='40' fill='%23F7F9F7'/><path d='M51 18 L78 26 L51 34 Z' fill='%23D3312B'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#10222E;
-  --ink-soft:#5C7180;
-  --cobalt:#14508C;
-  --cobalt-dk:#0E3A69;
-  --turf:#2E7D4F;
-  --signal:#D3312B;
-  --sun:#F2B417;
-  --paper:#EDF1F0;
-  --card:#FFFFFF;
-  --line:#D4DCDA;
-  --tile:#FFFFFF;
+  --ink:#14231B;
+  --ink-soft:#5F7266;
+  --cobalt:#0F6B45;        /* hlavní zeleň – tlačítka, aktivní stav */
+  --cobalt-dk:#0A4E32;
+  --turf:#2E9463;          /* potvrzení, hotovo */
+  --signal:#DC5741;        /* nedaná jamka, varování */
+  --sun:#E9B426;           /* eso, medaile, míček */
+  --paper:#EDF2E8;
+  --card:#FCFDFA;
+  --line:#DFE7DA;
+  --tile:#FCFDFA;
   --shadow:0 2px 6px rgba(16,34,46,.06), 0 10px 24px -14px rgba(16,34,46,.4);
   --r-s:12px; --r:16px; --r-l:22px;
   --obrys:rgba(16,34,46,.05);
@@ -36,10 +36,10 @@
 /* Tmavý motiv: podle systému, nebo natvrdo přes data-motiv na <html>. */
 @media (prefers-color-scheme: dark){
   :root:not([data-motiv="svetly"]){
-    --ink:#E8EEF1; --ink-soft:#93A7B3;
-    --cobalt:#3B84D0; --cobalt-dk:#2A6AAF;
-    --turf:#49A46E; --signal:#EC5B54; --sun:#F5C43F;
-    --paper:#0D1920; --card:#152430; --line:#273C4A; --tile:#152430;
+    --ink:#E7EFE8; --ink-soft:#8CA396;
+    --cobalt:#3BAE74; --cobalt-dk:#2C8659;
+    --turf:#4FC189; --signal:#F0705A; --sun:#F2C749;
+    --paper:#0C1511; --card:#16211A; --line:#27352C; --tile:#16211A;
     --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.8);
     --shadow-s:0 1px 2px rgba(0,0,0,.35);
     --obrys:rgba(255,255,255,.07);
@@ -48,23 +48,39 @@
 :root[data-motiv="tmavy"]{
   --shadow-s:0 1px 2px rgba(0,0,0,.35);
   --obrys:rgba(255,255,255,.07);
-    --ink:#E8EEF1; --ink-soft:#93A7B3;
-    --cobalt:#3B84D0; --cobalt-dk:#2A6AAF;
-    --turf:#49A46E; --signal:#EC5B54; --sun:#F5C43F;
-    --paper:#0D1920; --card:#152430; --line:#273C4A; --tile:#152430;
+    --ink:#E7EFE8; --ink-soft:#8CA396;
+    --cobalt:#3BAE74; --cobalt-dk:#2C8659;
+    --turf:#4FC189; --signal:#F0705A; --sun:#F2C749;
+    --paper:#0C1511; --card:#16211A; --line:#27352C; --tile:#16211A;
     --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.8);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 html{background:var(--paper)}
 /* Jemný obrázek na pozadí celé appky (~14 %) */
+/* Trávník: pruhy po sekačce se sbíhají do dálky, nahoře přisvícení.
+   Kreslí se celé v CSS, takže nepotřebuje žádný obrázek navíc. */
 html::before{
   content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:url("bg.webp") center top / cover no-repeat;
-  opacity:.14;
+  background:
+    radial-gradient(130% 60% at 78% -12%, rgba(255,255,255,.85), rgba(255,255,255,0) 60%),
+    repeating-linear-gradient(96deg,
+      rgba(15,107,69,.055) 0 46px,
+      rgba(15,107,69,.015) 46px 92px),
+    radial-gradient(120% 80% at 50% 120%, rgba(15,107,69,.10), rgba(15,107,69,0) 70%);
 }
-@media (prefers-color-scheme: dark){ html:not([data-motiv="svetly"])::before{opacity:.10} }
-html[data-motiv="tmavy"]::before{opacity:.10}
+@media (prefers-color-scheme: dark){
+  html:not([data-motiv="svetly"])::before{
+    background:
+      radial-gradient(130% 60% at 78% -12%, rgba(79,193,137,.10), rgba(0,0,0,0) 58%),
+      repeating-linear-gradient(96deg, rgba(255,255,255,.028) 0 46px, rgba(255,255,255,0) 46px 92px);
+  }
+}
+html[data-motiv="tmavy"]::before{
+  background:
+    radial-gradient(130% 60% at 78% -12%, rgba(79,193,137,.10), rgba(0,0,0,0) 58%),
+    repeating-linear-gradient(96deg, rgba(255,255,255,.028) 0 46px, rgba(255,255,255,0) 46px 92px);
+}
 body{
   position:relative;z-index:1;
   background:transparent; color:var(--ink);
@@ -405,6 +421,40 @@ td .ne{color:var(--signal);font-weight:700}
 @media (prefers-reduced-motion:reduce){
   .hole.rozehrana::after,.kl{animation:none}
 }
+
+/* ---------- tabule s průběhem ---------- */
+.rozbal{width:34px;height:34px;border-radius:11px;background:var(--card);border:1px solid var(--obrys);
+  display:grid;place-items:center;color:var(--ink-soft);box-shadow:var(--shadow-s);flex:none;
+  transition:transform .2s ease,color .2s ease}
+.rozbal.on{transform:rotate(180deg);color:var(--cobalt)}
+
+.tabule{background:var(--card);border:1px solid var(--obrys);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.tabule .tr{display:flex;align-items:center;gap:10px;padding:9px 13px;border-top:1px solid var(--line)}
+.tabule .tr:first-child{border-top:none}
+.tabule .tr.vede{background:color-mix(in srgb,var(--cobalt) 8%,transparent)}
+.tabule .m{width:14px;font-family:var(--display);font-size:14px;color:var(--ink-soft)}
+.tabule .tr.vede .m{color:var(--sun)}
+.tabule .jm{width:74px;flex:none;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabule .sc{width:38px;text-align:right;font-family:var(--display);font-size:21px}
+
+.spark{flex:1;display:flex;align-items:flex-end;gap:1.5px;height:26px;min-width:40px}
+.spark i{flex:1;min-width:1px;background:var(--cobalt);border-radius:1.5px;opacity:.85}
+.spark i.eso{background:var(--sun);opacity:1}
+.spark i.ne{background:var(--signal);opacity:1}
+.spark i.nic{background:var(--line);opacity:.7}
+
+.porovnani{display:flex;align-items:center;gap:9px;margin-top:10px;padding:10px 13px;
+  border-radius:var(--r-s);font-size:13px;line-height:1.35}
+.porovnani b{font-family:var(--display);font-size:15px;font-weight:400}
+.porovnani i{font-style:normal;opacity:.65;font-size:12px}
+.porovnani.lepsi{background:color-mix(in srgb,var(--turf) 14%,transparent);color:var(--cobalt-dk)}
+.porovnani.horsi{background:color-mix(in srgb,var(--signal) 12%,transparent);color:var(--signal)}
+.porovnani.stejne{background:var(--card);color:var(--ink-soft);border:1px solid var(--obrys)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-motiv="svetly"]) .porovnani.lepsi{color:var(--turf)}
+}
+:root[data-motiv="tmavy"] .porovnani.lepsi{color:var(--turf)}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
@@ -779,6 +829,7 @@ function openGame(id, silent) {
     LS.set('g:' + id, { game: d.game, skore: d.skore });
     S.err = null;
     try { history.replaceState(null, '', '?game=' + encodeURIComponent(id)); } catch (e) {}
+    if (!S.games.length) loadGames();   // kvůli porovnání s minulou hrou
   }).catch(function (e) {
     S.err = e.message;
     if (!silent && !S.game) {
@@ -1159,6 +1210,91 @@ function gameCard(g, live) {
 }
 
 /* ---------- obrazovka hry ---------- */
+/* ---------- vytahovací tabule pořadí ----------
+   Sbalená ukazuje kartičky jako dosud, rozbalená přidá ke každému hráči
+   sloupcový průběh po jamkách, takže je vidět, kde kdo ztrácel. */
+function tabuleOtevrena() { return LS.get('tabule', false) === true; }
+
+function sparkline(g, hracIdx, maxUder) {
+  var kola = seznamKol(g);
+  var pruhy = '';
+  for (var h = 1; h <= HOLES; h++) {
+    for (var ki = 0; ki < kola.length; ki++) {
+      var v = S.scores[key(h, hracIdx, kola[ki])];
+      var cls = !v ? 'nic' : (v === 1 ? 'eso' : isNe(v) ? 'ne' : '');
+      var vyska = v ? Math.max(12, Math.round(v / maxUder * 100)) : 8;
+      pruhy += '<i class="' + cls + '" style="height:' + vyska + '%" title="Jamka ' + h +
+        (kola.length > 1 ? ', ' + kola[ki] + '. kolo' : '') + (v ? ': ' + fmt(v) : '') + '"></i>';
+    }
+  }
+  return '<span class="spark">' + pruhy + '</span>';
+}
+
+function tabule(g, st) {
+  var maxUder = 1;
+  Object.keys(S.scores).forEach(function (k) { if (S.scores[k] > maxUder) maxUder = S.scores[k]; });
+
+  var h = '<div class="tabule">';
+  st.forEach(function (r, i) {
+    h += '<div class="tr' + (i === 0 && r.jamky ? ' vede' : '') + '" data-lb="' + g.id + ':' + r.i + '">' +
+      '<span class="m num">' + (r.jamky ? r.poradi : '–') + '</span>' +
+      avaHtml(r.jmeno, avaOf(g, r.i), 28) +
+      '<span class="jm">' + esc(r.jmeno) + '</span>' +
+      sparkline(g, r.i, maxUder) +
+      '<span class="sc num"' + (r.jamky ? ' data-pocitadlo="' + r.soucet + '"' : '') + '>' +
+        (r.jamky ? r.soucet : '–') + '</span>' +
+    '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+/* ---------- porovnání s minulou hrou na stejném hřišti ---------- */
+function porovnani(g, st) {
+  var vedouci = st.filter(function (r) { return r.jamky >= 3; })[0];
+  if (!vedouci || !g.misto) return '';
+
+  var kl = klicHrace(vedouci.jmeno);
+  var misto = String(g.misto).trim().toLowerCase();
+  var minula = null;
+
+  S.games.forEach(function (x) {
+    if (x.id === g.id) return;
+    if (String(x.misto || '').trim().toLowerCase() !== misto) return;
+    if (String(x.datum) > String(g.datum)) return;
+    var m = (x.vysledky || []).filter(function (v) {
+      return klicHrace(v.jmeno) === kl && v.jamky >= 3;
+    })[0];
+    if (!m) return;
+    if (!minula || String(x.datum) > String(minula.datum)) minula = { datum: x.datum, v: m };
+  });
+  if (!minula) return '';
+
+  var tedPrumer = vedouci.soucet / vedouci.jamky;
+  var minPrumer = minula.v.soucet / minula.v.jamky;
+  var rozdil = Math.round((minPrumer - tedPrumer) * vedouci.jamky);
+
+  var text, cls, sipka;
+  if (rozdil > 0) {
+    cls = 'lepsi'; sipka = '<path d="M5 15l5-5 4 3 5-6"/>';
+    text = esc(vedouci.jmeno) + ' je po ' + vedouci.jamky + ' ' + pl(vedouci.jamky, 'jamce', 'jamkách', 'jamkách') +
+      ' o <b>' + rozdil + '</b> ' + pl(rozdil, 'úder', 'údery', 'úderů') + ' lepší než minule tady';
+  } else if (rozdil < 0) {
+    cls = 'horsi'; sipka = '<path d="M5 9l5 5 4-3 5 6"/>';
+    text = esc(vedouci.jmeno) + ' zatím ztrácí <b>' + Math.abs(rozdil) + '</b> ' +
+      pl(Math.abs(rozdil), 'úder', 'údery', 'úderů') + ' na své minulé kolo tady';
+  } else {
+    cls = 'stejne'; sipka = '<path d="M5 12h14"/>';
+    text = esc(vedouci.jmeno) + ' drží stejné tempo jako minule tady';
+  }
+
+  return '<div class="porovnani ' + cls + '">' +
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" ' +
+    'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + sipka + '</svg>' +
+    '<span>' + text + ' <i>(' + czDate(minula.datum) + ')</i></span>' +
+  '</div>';
+}
+
 function viewGame() {
   var g = S.game;
   if (!g) return '<div class="top"><button class="iconbtn" data-act="home">←</button><div class="grow"><div class="brand">Načítám…</div></div></div>';
@@ -1189,7 +1325,18 @@ function viewGame() {
         for (var kz = 0; kz < kolaZ.length; kz++) if (S.scores[key(hz, pz, kolaZ[kz])]) zapsano++;
       }
     }
-    h += '<div class="hlava2"><h2 style="margin:0">Pořadí</h2>' + prstenec(zapsano, celkemZ) + '</div><div class="board">';
+    h += '<div class="hlava2"><h2 style="margin:0">Pořadí</h2>' +
+      '<span style="display:flex;align-items:center;gap:10px">' + prstenec(zapsano, celkemZ) +
+      '<button class="rozbal' + (tabuleOtevrena() ? ' on' : '') + '" data-act="tabule" ' +
+      'aria-label="' + (tabuleOtevrena() ? 'Sbalit tabuli' : 'Rozbalit tabuli s průběhem') + '">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' +
+      '</button></span></div>';
+
+    if (tabuleOtevrena()) {
+      h += tabule(g, st) + porovnani(g, st);
+    } else {
+      h += '<div class="board">';
     st.forEach(function (r, i) {
       var extra = [];
       if (r.aces) extra.push(r.aces + '× eso');
@@ -1202,8 +1349,9 @@ function viewGame() {
           (r.jamky ? r.soucet : '–') + '</div>' +
         '<div class="thru num">' + r.jamky + '/' + (HOLES * kolaHry(g)) + (kolaHry(g) === 2 ? ' zápisů' : ' jamek') + (extra.length ? ' · ' + extra.join(' · ') : '') + '</div>' +
       '</div>';
-    });
-    h += '</div>';
+      });
+      h += '</div>' + porovnani(g, st);
+    }
   }
 
   if (S.tab === 'holes') {
@@ -2272,6 +2420,7 @@ document.addEventListener('click', function (ev) {
     case 'home': goHome(); break;
     case 'open': openGame(t.getAttribute('data-id')); break;
     case 'tab': S.tab = t.getAttribute('data-tab'); paint(); break;
+    case 'tabule': LS.set('tabule', !tabuleOtevrena()); paint(); break;
 
     case 'new':
       formState = { datum: todayISO(), misto: '', hraci: LS.get('lastPlayers', ['', '']), avatary: LS.get('lastAvatars', []), kola: LS.get('lastKola', 1) };
