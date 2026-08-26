@@ -120,6 +120,7 @@ button{cursor:pointer;border:none;background:none}
 .pill.ok{color:var(--turf);border-color:color-mix(in srgb,var(--turf) 40%,transparent)}
 .pill.busy{color:var(--cobalt);border-color:color-mix(in srgb,var(--cobalt) 40%,transparent)}
 .pill.warn{color:var(--signal);border-color:color-mix(in srgb,var(--signal) 40%,transparent)}
+.pill.zamcena{color:var(--ink-soft);background:color-mix(in srgb,var(--ink) 7%,var(--card))}
 @media(max-width:479px){
   .pill .txt{display:none}
   .pill{padding:9px}
@@ -427,6 +428,19 @@ td .ne{color:var(--signal);font-weight:700}
   display:grid;place-items:center;color:var(--ink-soft);box-shadow:var(--shadow-s);flex:none;
   transition:transform .2s ease,color .2s ease}
 .rozbal.on{transform:rotate(180deg);color:var(--cobalt)}
+
+/* Vytahovací tabule: úchyt pod pořadím, tahem dolů se rozbalí průběh. */
+.tabulewrap{position:relative;transform:translateY(var(--tah,0px));transition:transform .2s cubic-bezier(.2,.8,.3,1)}
+.tabulewrap.tahne{transition:none}
+.uchyt{
+  width:100%;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:12px 0 8px;touch-action:none;cursor:grab;color:var(--ink-soft);
+}
+.uchyt:active{cursor:grabbing}
+.uchyt .bar{width:40px;height:5px;border-radius:999px;background:var(--line);transition:background .15s ease,width .15s ease}
+.uchyt .lbl{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.uchyt:active .bar,.tabulewrap.tahne .uchyt .bar{background:var(--cobalt);width:56px}
+.uchyt:active .lbl,.tabulewrap.tahne .uchyt .lbl{color:var(--cobalt)}
 
 .tabule{background:var(--card);border:1px solid var(--obrys);border-radius:var(--r);
   box-shadow:var(--shadow);overflow:hidden}
@@ -1305,9 +1319,10 @@ function viewGame() {
 
   h += '<div class="top">' +
        '<button class="iconbtn" data-act="home" aria-label="Zpět">' + ico('zpet') + '</button>' +
-       '<div class="grow"><div class="brand" style="font-size:19px">' + (hotovo ? ico('zamek', 16) + ' ' : '') + esc(g.misto || 'Minigolf') + '</div>' +
+       '<div class="grow"><div class="brand" style="font-size:19px">' + esc(g.misto || 'Minigolf') + '</div>' +
        '<div class="subtle num">' + esc(czDate(g.datum)) + ' · ' + g.hraci.length + ' ' + pl(g.hraci.length, 'hráč', 'hráči', 'hráčů') +
-       (kolaHry(g) === 2 ? ' · 2 kola' : '') + (hotovo ? ' · ukončeno' : '') + '</div></div>' +
+       (kolaHry(g) === 2 ? ' · 2 kola' : '') + '</div></div>' +
+       (hotovo ? '<span class="pill zamcena">' + ico('zamek', 14) + '<span class="txt">Ukončeno</span></span>' : '') +
        syncPill() +
        '<button class="iconbtn" data-act="refresh" aria-label="Načíst skóre znovu">' + ico('obnovit') + '</button>' +
        '<button class="iconbtn" data-act="settings" aria-label="Nastavení hry">' + ico('vic') + '</button>' +
@@ -1334,9 +1349,12 @@ function viewGame() {
       '</button></span></div>';
 
     if (tabuleOtevrena()) {
-      h += tabule(g, st) + porovnani(g, st);
+      h += '<div class="tabulewrap" data-tabulewrap>' + tabule(g, st) + porovnani(g, st) +
+        '<div class="uchyt" data-drag="tabule" role="button" tabindex="0" data-act="tabule" ' +
+        'aria-label="Sbalit tabuli"><span class="lbl">Zasuň tahem nahoru</span><span class="bar"></span></div>' +
+        '</div>';
     } else {
-      h += '<div class="board">';
+      h += '<div class="tabulewrap" data-tabulewrap><div class="board">';
     st.forEach(function (r, i) {
       var extra = [];
       if (r.aces) extra.push(r.aces + '× eso');
@@ -1350,7 +1368,11 @@ function viewGame() {
         '<div class="thru num">' + r.jamky + '/' + (HOLES * kolaHry(g)) + (kolaHry(g) === 2 ? ' zápisů' : ' jamek') + (extra.length ? ' · ' + extra.join(' · ') : '') + '</div>' +
       '</div>';
       });
-      h += '</div>' + porovnani(g, st);
+      h += '</div>' + porovnani(g, st) +
+        '<div class="uchyt" data-drag="tabule" role="button" tabindex="0" data-act="tabule" ' +
+        'aria-label="Rozbalit tabuli s průběhem"><span class="bar"></span>' +
+        '<span class="lbl">Vytažením dolů průběh po jamkách</span></div>' +
+        '</div>';
     }
   }
 
@@ -2420,7 +2442,7 @@ document.addEventListener('click', function (ev) {
     case 'home': goHome(); break;
     case 'open': openGame(t.getAttribute('data-id')); break;
     case 'tab': S.tab = t.getAttribute('data-tab'); paint(); break;
-    case 'tabule': LS.set('tabule', !tabuleOtevrena()); paint(); break;
+    case 'tabule': if (tabulePotlacitKlik) break; LS.set('tabule', !tabuleOtevrena()); paint(); break;
 
     case 'new':
       formState = { datum: todayISO(), misto: '', hraci: LS.get('lastPlayers', ['', '']), avatary: LS.get('lastAvatars', []), kola: LS.get('lastKola', 1) };
@@ -2786,6 +2808,55 @@ document.addEventListener('keydown', function (e) {
     }
   }, { passive: true });
 })();
+
+/* ---------- vytažení tabule pořadí prstem ----------
+   Úchyt pod pořadím jde chytit a vytáhnout: tah dolů rozbalí průběh po
+   jamkách, tah nahoru ho zase zasune. Karta jde za prstem, po puštění
+   se buď překlopí, nebo pruží zpět. */
+(function () {
+  var wrap = null, y0 = 0, dy = 0, dolu = true, prekloplo = false;
+
+  function konec() {
+    if (!wrap) return;
+    wrap.classList.remove('tahne');
+    wrap.style.removeProperty('--tah');
+    wrap = null; dy = 0;
+  }
+
+  document.addEventListener('pointerdown', function (e) {
+    var uchyt = e.target.closest && e.target.closest('[data-drag="tabule"]');
+    if (!uchyt) return;
+    wrap = uchyt.closest('[data-tabulewrap]');
+    if (!wrap) return;
+    y0 = e.clientY; dy = 0; prekloplo = false;
+    dolu = !tabuleOtevrena();
+    wrap.classList.add('tahne');
+  });
+
+  document.addEventListener('pointermove', function (e) {
+    if (!wrap) return;
+    dy = e.clientY - y0;
+    var t = dolu ? Math.max(-10, Math.min(96, dy)) : Math.min(10, Math.max(-96, dy));
+    wrap.style.setProperty('--tah', t.toFixed(1) + 'px');
+    if (!prekloplo && (dolu ? dy > 48 : dy < -48)) {
+      prekloplo = true;
+      if (navigator.vibrate) { try { navigator.vibrate(8); } catch (err) {} }
+      konec();
+      LS.set('tabule', dolu);
+      paint();
+    }
+  }, { passive: true });
+
+  document.addEventListener('pointerup', function () {
+    var bylo = prekloplo;
+    konec();
+    /* Když se karta jen protáhla a vrátila, nechceme, aby klik navíc překlopil. */
+    if (bylo) tabulePotlacitKlik = true;
+    setTimeout(function () { tabulePotlacitKlik = false; }, 60);
+  });
+  document.addEventListener('pointercancel', konec);
+})();
+var tabulePotlacitKlik = false;
 
 /* ---------- přejetí prstem mezi jamkami ---------- */
 var swipeX = null, swipeY = null;
