@@ -14,73 +14,160 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════════════════════════════
+   VZHLED
+   Dvě nezávislé volby:
+     data-styl  = trávník (výchozí) | stadion | papir | bloky | fotka
+     data-tmavy = nastaví JavaScript podle volby světlá/tmavá/podle systému
+   ══════════════════════════════════════════════════════════════ */
 :root{
+  --display:"Anton","Haettenschweiler","Arial Narrow",system-ui,sans-serif;
+  --body:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r-s:12px; --r:16px; --r-l:22px;
+  --hrana:1px;
+
+  /* ── Trávník, světlá ── */
   --ink:#14231B;
   --ink-soft:#5F7266;
-  --cobalt:#0F6B45;        /* hlavní zeleň – tlačítka, aktivní stav */
+  --cobalt:#0F6B45;
   --cobalt-dk:#0A4E32;
-  --turf:#2E9463;          /* potvrzení, hotovo */
-  --signal:#DC5741;        /* nedaná jamka, varování */
-  --sun:#E9B426;           /* eso, medaile, míček */
+  --turf:#2E9463;
+  --signal:#DC5741;
+  --sun:#E9B426;
   --paper:#EDF2E8;
   --card:#FCFDFA;
   --line:#DFE7DA;
   --tile:#FCFDFA;
-  --shadow:0 2px 6px rgba(16,34,46,.06), 0 10px 24px -14px rgba(16,34,46,.4);
-  --r-s:12px; --r:16px; --r-l:22px;
   --obrys:rgba(16,34,46,.05);
+  --shadow:0 2px 6px rgba(16,34,46,.06), 0 10px 24px -14px rgba(16,34,46,.4);
   --shadow-s:0 1px 2px rgba(16,34,46,.05), 0 1px 1px rgba(16,34,46,.03);
-  --display:"Anton","Haettenschweiler","Arial Narrow",system-ui,sans-serif;
-  --body:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-}
-/* Tmavý motiv: podle systému, nebo natvrdo přes data-motiv na <html>. */
-@media (prefers-color-scheme: dark){
-  :root:not([data-motiv="svetly"]){
-    --ink:#E7EFE8; --ink-soft:#8CA396;
-    --cobalt:#3BAE74; --cobalt-dk:#2C8659;
-    --turf:#4FC189; --signal:#F0705A; --sun:#F2C749;
-    --paper:#0C1511; --card:#16211A; --line:#27352C; --tile:#16211A;
-    --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.8);
-    --shadow-s:0 1px 2px rgba(0,0,0,.35);
-    --obrys:rgba(255,255,255,.07);
-  }
-}
-:root[data-motiv="tmavy"]{
-  --shadow-s:0 1px 2px rgba(0,0,0,.35);
-  --obrys:rgba(255,255,255,.07);
-    --ink:#E7EFE8; --ink-soft:#8CA396;
-    --cobalt:#3BAE74; --cobalt-dk:#2C8659;
-    --turf:#4FC189; --signal:#F0705A; --sun:#F2C749;
-    --paper:#0C1511; --card:#16211A; --line:#27352C; --tile:#16211A;
-    --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.8);
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-html{background:var(--paper)}
-/* Jemný obrázek na pozadí celé appky (~14 %) */
-/* Trávník: pruhy po sekačce se sbíhají do dálky, nahoře přisvícení.
-   Kreslí se celé v CSS, takže nepotřebuje žádný obrázek navíc. */
-html::before{
-  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:
+  --pozadi:
     radial-gradient(130% 60% at 78% -12%, rgba(255,255,255,.85), rgba(255,255,255,0) 60%),
-    repeating-linear-gradient(96deg,
-      rgba(15,107,69,.055) 0 46px,
-      rgba(15,107,69,.015) 46px 92px),
+    repeating-linear-gradient(96deg, rgba(15,107,69,.055) 0 46px, rgba(15,107,69,.015) 46px 92px),
     radial-gradient(120% 80% at 50% 120%, rgba(15,107,69,.10), rgba(15,107,69,0) 70%);
+  --pozadi-velikost:auto;
 }
-@media (prefers-color-scheme: dark){
-  html:not([data-motiv="svetly"])::before{
-    background:
-      radial-gradient(130% 60% at 78% -12%, rgba(79,193,137,.10), rgba(0,0,0,0) 58%),
-      repeating-linear-gradient(96deg, rgba(255,255,255,.028) 0 46px, rgba(255,255,255,0) 46px 92px);
-  }
-}
-html[data-motiv="tmavy"]::before{
-  background:
+/* ── Trávník, tmavá ── */
+html[data-tmavy]{
+  --ink:#E7EFE8; --ink-soft:#8CA396;
+  --cobalt:#3BAE74; --cobalt-dk:#2C8659;
+  --turf:#4FC189; --signal:#F0705A; --sun:#F2C749;
+  --paper:#0C1511; --card:#16211A; --line:#27352C; --tile:#16211A;
+  --obrys:rgba(255,255,255,.07);
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.8);
+  --shadow-s:0 1px 2px rgba(0,0,0,.35);
+  --pozadi:
     radial-gradient(130% 60% at 78% -12%, rgba(79,193,137,.10), rgba(0,0,0,0) 58%),
     repeating-linear-gradient(96deg, rgba(255,255,255,.028) 0 46px, rgba(255,255,255,0) 46px 92px);
 }
+
+/* ══ Modrá s fotkou – původní vzhled i s obrázkem na pozadí ══ */
+html[data-styl="fotka"]{
+  --ink:#10222E; --ink-soft:#5C7180;
+  --cobalt:#14508C; --cobalt-dk:#0E3A69;
+  --turf:#2E7D4F; --signal:#D3312B; --sun:#F2B417;
+  --paper:#EDF1F0; --card:#FFFFFF; --line:#D4DCDA; --tile:#FFFFFF;
+  --obrys:rgba(16,34,46,.05);
+  --shadow:0 2px 6px rgba(16,34,46,.06), 0 10px 24px -14px rgba(16,34,46,.4);
+  --shadow-s:0 1px 2px rgba(16,34,46,.05), 0 1px 1px rgba(16,34,46,.03);
+  --pozadi:linear-gradient(rgba(237,241,240,.86), rgba(237,241,240,.86)), url("bg.webp") center top / cover no-repeat;
+}
+html[data-styl="fotka"][data-tmavy]{
+  --ink:#E8EEF1; --ink-soft:#93A7B3;
+  --cobalt:#3B84D0; --cobalt-dk:#2A6AAF;
+  --turf:#49A46E; --signal:#EC5B54; --sun:#F5C43F;
+  --paper:#0D1920; --card:#152430; --line:#273C4A; --tile:#152430;
+  --obrys:rgba(255,255,255,.07);
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.8);
+  --shadow-s:0 1px 2px rgba(0,0,0,.35);
+  --pozadi:linear-gradient(rgba(13,25,32,.90), rgba(13,25,32,.90)), url("bg.webp") center top / cover no-repeat;
+}
+
+/* ══ Noční stadion – vždy tmavý, svítivý akcent ══ */
+html[data-styl="stadion"],
+html[data-styl="stadion"][data-tmavy]{
+  --ink:#F2F5F7; --ink-soft:#7C8894;
+  --cobalt:#C6F24E; --cobalt-dk:#A9D833;
+  --turf:#7FD94F; --signal:#FF5A47; --sun:#F2C744;
+  --paper:#0A0C0F; --card:#12161B; --line:#232A33; --tile:#12161B;
+  --obrys:rgba(255,255,255,.06);
+  --shadow:0 2px 10px rgba(0,0,0,.5);
+  --shadow-s:0 1px 3px rgba(0,0,0,.45);
+  --r-s:10px; --r:13px; --r-l:18px;
+  --pozadi:
+    radial-gradient(90% 45% at 50% -10%, rgba(198,242,78,.10), rgba(0,0,0,0) 60%),
+    radial-gradient(70% 40% at 50% 110%, rgba(198,242,78,.05), rgba(0,0,0,0) 60%);
+}
+html[data-styl="stadion"] .btn:not(.ghost):not(.danger),
+html[data-styl="stadion"] .tab.on,
+html[data-styl="stadion"] .pchip.active,
+html[data-styl="stadion"] .key.sel,
+html[data-styl="stadion"] .spodek .on{color:#0A0C0F}
+
+/* ══ Papírová karta ══ */
+html[data-styl="papir"]{
+  --ink:#2C2822; --ink-soft:#7A6F5D;
+  --cobalt:#B23A2E; --cobalt-dk:#8E2C22;
+  --turf:#4A6B3F; --signal:#B23A2E; --sun:#C8912B;
+  --paper:#EFE9DB; --card:#FBF7EF; --line:#DDD3BF; --tile:#FBF7EF;
+  --obrys:rgba(90,78,58,.14);
+  --shadow:0 1px 2px rgba(70,60,42,.10);
+  --shadow-s:0 1px 1px rgba(70,60,42,.07);
+  --r-s:5px; --r:7px; --r-l:9px;
+  --pozadi:radial-gradient(rgba(120,105,80,.10) 1px, transparent 1px);
+  --pozadi-velikost:4px 4px;
+}
+html[data-styl="papir"][data-tmavy]{
+  --ink:#EDE5D4; --ink-soft:#A2957C;
+  --cobalt:#E0715F; --cobalt-dk:#C05948;
+  --turf:#88B073; --signal:#E0715F; --sun:#DFB65A;
+  --paper:#191612; --card:#221E18; --line:#332D24; --tile:#221E18;
+  --obrys:rgba(255,255,255,.06);
+  --pozadi:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+}
+
+/* ══ Barevné bloky ══ */
+html[data-styl="bloky"]{
+  --ink:#151310; --ink-soft:#5A5348;
+  --cobalt:#151310; --cobalt-dk:#000;
+  --turf:#3FBF6A; --signal:#FF6B8A; --sun:#FFC93C;
+  --paper:#E9E3D3; --card:#FFFDF7; --line:#151310; --tile:#FFFDF7;
+  --obrys:#151310;
+  --hrana:2.5px;
+  --shadow:4px 4px 0 #151310;
+  --shadow-s:3px 3px 0 #151310;
+  --r-s:12px; --r:16px; --r-l:20px;
+  --pozadi:
+    radial-gradient(28% 18% at 12% 8%, rgba(255,201,60,.5), rgba(0,0,0,0) 70%),
+    radial-gradient(26% 16% at 88% 22%, rgba(46,211,198,.45), rgba(0,0,0,0) 70%),
+    radial-gradient(30% 20% at 70% 92%, rgba(255,107,138,.4), rgba(0,0,0,0) 70%);
+}
+html[data-styl="bloky"][data-tmavy]{
+  --ink:#FFFDF7; --ink-soft:#A9A294;
+  --cobalt:#FFC93C; --cobalt-dk:#E0A712;
+  --turf:#3FBF6A; --signal:#FF6B8A;
+  --paper:#151310; --card:#221F1A; --line:#FFFDF7; --tile:#221F1A;
+  --obrys:#FFFDF7;
+  --shadow:4px 4px 0 #FFFDF7;
+  --shadow-s:3px 3px 0 #FFFDF7;
+}
+html[data-styl="bloky"] .btn:not(.ghost):not(.danger),
+html[data-styl="bloky"] .tab.on,
+html[data-styl="bloky"] .key.sel,
+html[data-styl="bloky"] .pchip.active{border:var(--hrana) solid var(--obrys)}
+html[data-styl="bloky"][data-tmavy] .btn:not(.ghost):not(.danger),
+html[data-styl="bloky"][data-tmavy] .tab.on{color:#151310}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{background:var(--paper)}
+/* Pozadí kreslí zvolený styl přes proměnnou --pozadi. */
+html::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:var(--pozadi);
+  background-size:var(--pozadi-velikost,auto);
+}
+
 body{
   position:relative;z-index:1;
   background:transparent; color:var(--ink);
@@ -107,13 +194,13 @@ button{cursor:pointer;border:none;background:none}
 .brand span{color:var(--cobalt)}
 .subtle{color:var(--ink-soft);font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .iconbtn{
-  width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
+  width:44px;height:44px;border-radius:12px;border:var(--hrana) solid var(--line);
   background:var(--card);display:grid;place-items:center;font-size:19px;flex:none;
 }
 .iconbtn:active{background:var(--paper)}
 .pill{
   font-size:12px;font-weight:600;padding:6px 10px;border-radius:999px;
-  border:1px solid var(--line);background:var(--card);color:var(--ink-soft);white-space:nowrap;
+  border:var(--hrana) solid var(--line);background:var(--card);color:var(--ink-soft);white-space:nowrap;
   display:inline-flex;align-items:center;gap:6px;flex:none;
 }
 .pill i.dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
@@ -141,7 +228,7 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
   box-shadow:var(--shadow);
 }
 .btn:active{transform:translateY(1px)}
-.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.btn.ghost{background:var(--card);color:var(--ink);border:var(--hrana) solid var(--line);box-shadow:none}
 .btn.danger{background:var(--card);color:var(--signal);border:1px solid color-mix(in srgb,var(--signal) 40%,transparent);box-shadow:none}
 .btn.big{padding:18px;font-family:var(--display);font-size:19px;letter-spacing:.06em;text-transform:uppercase;font-weight:400}
 .row{display:flex;gap:10px}
@@ -149,7 +236,7 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 
 /* ---------- cards ---------- */
 .card{
-  background:var(--card);border:1px solid var(--obrys);border-radius:var(--r);
+  background:var(--card);border:var(--hrana) solid var(--obrys);border-radius:var(--r);
   padding:15px 16px;box-shadow:var(--shadow);width:100%;text-align:left;display:block;
   transition:transform .12s ease;
 }
@@ -167,7 +254,7 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 @media(min-width:420px){.board{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(min-width:560px){.board{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .lb{
-  min-width:0;background:var(--card);border:1px solid var(--obrys);
+  min-width:0;background:var(--card);border:var(--hrana) solid var(--obrys);
   border-radius:var(--r-s);padding:10px 12px;position:relative;overflow:hidden;
   box-shadow:var(--shadow-s);
 }
@@ -183,7 +270,7 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 .holes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 @media(min-width:520px){.holes{grid-template-columns:repeat(6,1fr)}}
 .hole{
-  position:relative;background:var(--tile);border:1px solid var(--obrys);border-radius:var(--r-s);
+  position:relative;background:var(--tile);border:var(--hrana) solid var(--obrys);border-radius:var(--r-s);
   padding:11px 8px 10px;overflow:hidden;text-align:center;box-shadow:var(--shadow);
   min-height:86px;display:flex;flex-direction:column;justify-content:center;
   transition:border-color .15s ease;
@@ -222,20 +309,20 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 label.f{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
         color:var(--ink-soft);margin:14px 0 6px}
 input[type=text],input[type=date],input[type=number],select{
-  width:100%;padding:13px 14px;border-radius:11px;border:1px solid var(--line);
+  width:100%;padding:13px 14px;border-radius:11px;border:var(--hrana) solid var(--line);
   background:var(--card);font-size:16px;
 }
 .playerrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .playerrow .idx{width:26px;text-align:center;font-family:var(--display);color:var(--ink-soft)}
 .playerrow input{flex:1}
-.playerrow .rm{width:42px;height:46px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--signal);flex:none}
+.playerrow .rm{width:42px;height:46px;border-radius:11px;border:var(--hrana) solid var(--line);background:var(--card);color:var(--signal);flex:none}
 
 /* ---------- hole entry ---------- */
 .pchips{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;
   -webkit-overflow-scrolling:touch}
 .pchips::-webkit-scrollbar{display:none}
 .pchip{
-  flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;
+  flex:none;border:var(--hrana) solid var(--line);background:var(--card);border-radius:999px;
   padding:7px 15px 7px 7px;font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center;
 }
 .pchip .v{font-family:var(--display);font-size:16px;color:var(--ink-soft);min-width:12px}
@@ -249,7 +336,7 @@ input[type=text],input[type=date],input[type=number],select{
 
 .keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px}
 .key{
-  aspect-ratio:1.2/1;min-height:62px;border-radius:14px;border:1px solid var(--line);background:var(--card);
+  aspect-ratio:1.2/1;min-height:62px;border-radius:14px;border:var(--hrana) solid var(--line);background:var(--card);
   font-family:var(--display);font-size:29px;display:grid;place-items:center;box-shadow:var(--shadow);
   -webkit-tap-highlight-color:transparent;
 }
@@ -266,7 +353,7 @@ input[type=text],input[type=date],input[type=number],select{
 .key.wipe{font-family:var(--body);font-size:14px;font-weight:600;color:var(--ink-soft)}
 
 /* ---------- scorecard ---------- */
-.tablewrap{overflow-x:auto;border:1px solid var(--obrys);border-radius:var(--r);background:var(--card);box-shadow:var(--shadow-s)}
+.tablewrap{overflow-x:auto;border:var(--hrana) solid var(--obrys);border-radius:var(--r);background:var(--card);box-shadow:var(--shadow-s)}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:8px 9px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
 thead th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
@@ -322,14 +409,14 @@ tr.win td.sticky{color:var(--cobalt)}
 
 .rest{margin-top:14px;display:flex;flex-direction:column;gap:8px}
 .restrow{display:flex;align-items:center;gap:11px;background:var(--card);
-  border:1px solid var(--obrys);border-radius:var(--r-s);padding:11px 13px;box-shadow:var(--shadow-s)}
+  border:var(--hrana) solid var(--obrys);border-radius:var(--r-s);padding:11px 13px;box-shadow:var(--shadow-s)}
 .restrow .r{font-family:var(--display);color:var(--ink-soft);min-width:24px;text-align:center}
 .restrow .nm{flex:1;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .restrow .sc{font-family:var(--display);font-size:20px}
 .restrow .sub{font-size:11px;color:var(--ink-soft);margin-left:6px}
 
 .locknote{
-  display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--obrys);
+  display:flex;align-items:center;gap:10px;background:var(--card);border:var(--hrana) solid var(--obrys);
   border-radius:var(--r-s);padding:12px 14px;color:var(--ink-soft);font-size:13px;margin-top:12px;
   box-shadow:var(--shadow-s);
 }
@@ -354,12 +441,12 @@ tr.win td.sticky{color:var(--cobalt)}
 /* ---------- statistiky ---------- */
 .statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 @media(min-width:480px){.statgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.stat{background:var(--card);border:1px solid var(--obrys);border-radius:var(--r-s);padding:12px 13px;box-shadow:var(--shadow-s);min-width:0}
+.stat{background:var(--card);border:var(--hrana) solid var(--obrys);border-radius:var(--r-s);padding:12px 13px;box-shadow:var(--shadow-s);min-width:0}
 .stat .v{font-family:var(--display);font-size:25px;line-height:1.05}
 .stat .k{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
 .stat .s{font-size:11px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.barrow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--obrys);
+.barrow{display:flex;align-items:center;gap:10px;background:var(--card);border:var(--hrana) solid var(--obrys);
   border-radius:var(--r-s);padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow-s)}
 .barrow .nm{font-weight:600;flex:0 0 76px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
 .barrow .track{flex:1;height:9px;border-radius:999px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden;min-width:30px}
@@ -368,7 +455,7 @@ tr.win td.sticky{color:var(--cobalt)}
 .barrow .v{font-family:var(--display);font-size:19px;min-width:42px;text-align:right}
 
 .holebars{display:flex;align-items:flex-end;gap:3px;height:118px;background:var(--card);
-  border:1px solid var(--obrys);border-radius:var(--r-s);padding:12px 9px 9px;box-shadow:var(--shadow-s)}
+  border:var(--hrana) solid var(--obrys);border-radius:var(--r-s);padding:12px 9px 9px;box-shadow:var(--shadow-s)}
 .hb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px}
 .hb .b{width:100%;border-radius:3px 3px 0 0;background:var(--cobalt);min-height:2px}
 .hb.max .b{background:var(--signal)}
@@ -393,7 +480,7 @@ td .ne{color:var(--signal);font-weight:700}
 .prsten b{position:absolute;font-family:var(--display);font-size:12px;font-weight:400;color:var(--ink)}
 .prsten b::after{content:"%";font-size:8px;opacity:.55;margin-left:1px}
 
-.kostra{background:var(--card);border:1px solid var(--obrys);border-radius:var(--r);
+.kostra{background:var(--card);border:var(--hrana) solid var(--obrys);border-radius:var(--r);
   padding:15px 16px;box-shadow:var(--shadow-s);margin-bottom:11px}
 .kl{border-radius:6px;background:linear-gradient(90deg,
   color-mix(in srgb,var(--ink) 7%,transparent) 25%,
@@ -424,7 +511,7 @@ td .ne{color:var(--signal);font-weight:700}
 }
 
 /* ---------- tabule s průběhem ---------- */
-.rozbal{width:34px;height:34px;border-radius:11px;background:var(--card);border:1px solid var(--obrys);
+.rozbal{width:34px;height:34px;border-radius:11px;background:var(--card);border:var(--hrana) solid var(--obrys);
   display:grid;place-items:center;color:var(--ink-soft);box-shadow:var(--shadow-s);flex:none;
   transition:transform .2s ease,color .2s ease}
 .rozbal.on{transform:rotate(180deg);color:var(--cobalt)}
@@ -442,7 +529,7 @@ td .ne{color:var(--signal);font-weight:700}
 .uchyt:active .bar,.tabulewrap.tahne .uchyt .bar{background:var(--cobalt);width:56px}
 .uchyt:active .lbl,.tabulewrap.tahne .uchyt .lbl{color:var(--cobalt)}
 
-.tabule{background:var(--card);border:1px solid var(--obrys);border-radius:var(--r);
+.tabule{background:var(--card);border:var(--hrana) solid var(--obrys);border-radius:var(--r);
   box-shadow:var(--shadow);overflow:hidden}
 .tabule .tr{display:flex;align-items:center;gap:10px;padding:9px 13px;border-top:1px solid var(--line)}
 .tabule .tr:first-child{border-top:none}
@@ -464,11 +551,22 @@ td .ne{color:var(--signal);font-weight:700}
 .porovnani i{font-style:normal;opacity:.65;font-size:12px}
 .porovnani.lepsi{background:color-mix(in srgb,var(--turf) 14%,transparent);color:var(--cobalt-dk)}
 .porovnani.horsi{background:color-mix(in srgb,var(--signal) 12%,transparent);color:var(--signal)}
-.porovnani.stejne{background:var(--card);color:var(--ink-soft);border:1px solid var(--obrys)}
-@media (prefers-color-scheme: dark){
-  :root:not([data-motiv="svetly"]) .porovnani.lepsi{color:var(--turf)}
+.porovnani.stejne{background:var(--card);color:var(--ink-soft);border:var(--hrana) solid var(--obrys)}
+html[data-tmavy] .porovnani.lepsi{color:var(--turf)}
+
+/* ---------- výběr stylu ---------- */
+.styly{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.styl{
+  text-align:left;background:var(--card);border:var(--hrana) solid var(--obrys);border-radius:var(--r-s);
+  padding:11px 12px;box-shadow:var(--shadow-s);min-width:0;
 }
-:root[data-motiv="tmavy"] .porovnani.lepsi{color:var(--turf)}
+.styl.on{border-color:var(--cobalt);box-shadow:0 0 0 1px var(--cobalt),var(--shadow-s)}
+.styl .vzorek{display:flex;gap:0;border-radius:99px;overflow:hidden;height:16px;margin-bottom:8px;
+  border:1px solid var(--obrys)}
+.styl .vzorek i{flex:1;display:block}
+.styl b{display:block;font-size:14.5px;font-weight:700}
+.styl .po{display:block;font-size:11.5px;color:var(--ink-soft);line-height:1.3;margin-top:2px}
+.styl.on b{color:var(--cobalt)}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
@@ -484,7 +582,7 @@ td .ne{color:var(--signal);font-weight:700}
 .avastack .ava{margin-right:-8px;box-shadow:0 0 0 2px var(--card)}
 .avastack .ava:last-child{margin-right:0}
 .avabtn{
-  border:1px solid var(--line);background:var(--card);border-radius:50%;padding:2px;
+  border:var(--hrana) solid var(--line);background:var(--card);border-radius:50%;padding:2px;
   width:52px;height:52px;flex:none;display:grid;place-items:center;position:relative;
 }
 .avabtn::after{
@@ -2286,16 +2384,69 @@ function sheetNew() {
 var sestavyCache = [];
 
 /* ---------- nastavení appky ---------- */
-function motiv() { return LS.get('motiv', 'auto'); }
+var STYLY = [
+  { id:'travnik', nazev:'Trávník', popis:'Zeleň hřiště, pruhy po sekačce', barvy:['#0F6B45','#E9B426','#EDF2E8'], tmavyJde:true },
+  { id:'fotka',   nazev:'Modrá',   popis:'Původní vzhled s fotkou',       barvy:['#14508C','#F2B417','#EDF1F0'], tmavyJde:true },
+  { id:'stadion', nazev:'Stadion', popis:'Noční, svítivý akcent',         barvy:['#0A0C0F','#C6F24E','#232A33'], tmavyJde:false },
+  { id:'papir',   nazev:'Papír',   popis:'Skórkarta, razítková červená',  barvy:['#EFE9DB','#B23A2E','#4A6B3F'], tmavyJde:true },
+  { id:'bloky',   nazev:'Bloky',   popis:'Syté barvy, černé obrysy',      barvy:['#FFC93C','#2ED3C6','#FF6B8A'], tmavyJde:true }
+];
 
-function pouzijMotiv() {
-  var m = motiv();
-  if (m === 'auto') document.documentElement.removeAttribute('data-motiv');
-  else document.documentElement.setAttribute('data-motiv', m);
+function motiv() { return LS.get('motiv', 'auto'); }
+function styl() {
+  var s = LS.get('styl', 'travnik');
+  return STYLY.some(function (x) { return x.id === s; }) ? s : 'travnik';
 }
+function stylData() {
+  var id = styl();
+  return STYLY.filter(function (x) { return x.id === id; })[0];
+}
+
+/* Tmavost rozhoduje JavaScript, aby styly nemusely řešit systémové dotazy. */
+function pouzijMotiv() {
+  var el = document.documentElement;
+  var st = stylData();
+  var m = motiv();
+
+  if (styl() === 'travnik') el.removeAttribute('data-styl');
+  else el.setAttribute('data-styl', styl());
+
+  var tmavy;
+  if (!st.tmavyJde) tmavy = true;
+  else if (m === 'tmavy') tmavy = true;
+  else if (m === 'svetly') tmavy = false;
+  else tmavy = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  if (tmavy) el.setAttribute('data-tmavy', ''); else el.removeAttribute('data-tmavy');
+  el.setAttribute('data-motiv', tmavy ? 'tmavy' : 'svetly');
+
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', getComputedStyle(el).getPropertyValue('--paper').trim() || '#0F6B45');
+}
+
+/* Při volbě „podle systému" reagujeme na přepnutí v telefonu. */
+(function () {
+  if (!window.matchMedia) return;
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  var reakce = function () { if (motiv() === 'auto') pouzijMotiv(); };
+  if (mq.addEventListener) mq.addEventListener('change', reakce);
+  else if (mq.addListener) mq.addListener(reakce);
+})();
 
 function sheetApi() {
   var m = motiv();
+  var aktStyl = styl();
+  var st = stylData();
+  var dlazdice = STYLY.map(function (x) {
+    return '<button class="styl' + (x.id === aktStyl ? ' on' : '') + '" data-act="setStyl" data-s="' + x.id + '">' +
+      '<span class="vzorek">' + x.barvy.map(function (b) {
+        return '<i style="background:' + b + '"></i>';
+      }).join('') + '</span>' +
+      '<b>' + x.nazev + '</b>' +
+      '<span class="po">' + x.popis + '</span>' +
+    '</button>';
+  }).join('');
+
   var volby = [['auto', 'Podle systému'], ['svetly', 'Světlý'], ['tmavy', 'Tmavý']];
   var prep = volby.map(function (v) {
     return '<button class="tab' + (m === v[0] ? ' on' : '') + '" data-act="setMotiv" data-m="' + v[0] + '" ' +
@@ -2304,9 +2455,14 @@ function sheetApi() {
 
   return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Nastavení">' +
     '<div class="grabber"></div><div class="sheet-head"><div class="t">Nastavení</div><button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button></div>' +
-    '<label class="f" style="margin-top:0">Vzhled</label>' +
-    '<div class="row" style="gap:8px">' + prep + '</div>' +
-    '<div class="hint">Tmavý motiv se hodí na večerní hraní. „Podle systému" se řídí nastavením telefonu.</div>' +
+    '<label class="f" style="margin-top:0">Styl</label>' +
+    '<div class="styly">' + dlazdice + '</div>' +
+    '<label class="f">Světlost</label>' +
+    (st.tmavyJde
+      ? '<div class="row" style="gap:8px">' + prep + '</div>' +
+        '<div class="hint">„Podle systému" se řídí nastavením telefonu.</div>'
+      : '<div class="hint" style="margin-top:0">Styl ' + esc(st.nazev) + ' existuje jen v tmavé podobě, ' +
+        'proto se tu nedá přepínat.</div>') +
     '<label class="f" for="a-url">Adresa skriptu</label>' +
     '<input id="a-url" type="text" data-f="apiurl" value="' + esc(apiUrl()) + '" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">' +
     '<div class="hint">Najdeš ji v Apps Scriptu pod Nasadit → Spravovat nasazení. Musí končit na /exec.</div>' +
@@ -2437,6 +2593,13 @@ document.addEventListener('click', function (ev) {
       LS.set('motiv', t.getAttribute('data-m'));
       pouzijMotiv();
       paint({ sheetOnly: true });
+      break;
+
+    case 'setStyl':
+      LS.set('styl', t.getAttribute('data-s'));
+      pouzijMotiv();
+      if (navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
+      paint();
       break;
     case 'resetApi': LS.del('api'); openSheet = null; toast('Adresa vrácena na výchozí'); paint(); loadGames(); break;
     case 'home': goHome(); break;
