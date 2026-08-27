@@ -340,6 +340,17 @@ html[data-styl="bloky"][data-tmavy] .narade{color:#151310}
 .pava.filled .ava{opacity:1}
 .pava.filled .v{color:var(--turf)}
 .pava.fail .v{color:var(--signal)}
+
+/* Ukončená hra – jen výpis, žádná klávesnice. */
+.vyslgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;
+  margin-bottom:4px}
+.vysl{display:flex;align-items:center;gap:9px;min-height:48px;padding:6px 12px 6px 6px;
+  border-radius:var(--r-s);border:var(--hrana) solid var(--line);background:var(--card)}
+.vysl .jm{flex:1;min-width:0;font-weight:600;font-size:14px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vysl .v{font-family:var(--display);font-size:20px;color:var(--ink)}
+.vysl.eso .v{color:var(--sun)}
+.vysl.fail .v{color:var(--signal)}
 .pchip.fail{border-color:color-mix(in srgb,var(--signal) 55%,transparent)}
 .pchip.fail .v{color:var(--signal)}
 
@@ -1628,7 +1639,7 @@ function viewGame() {
       var celkem = g.hraci.length * kolaJ.length;
       var pct = Math.round(filled / celkem * 100);
       var rozehrana = (!hotovo && filled > 0 && filled < celkem);
-      h += '<button class="hole' + (filled === celkem ? ' done' : '') + (rozehrana ? ' rozehrana' : '') + (hotovo ? ' locked' : '') + '" data-act="' + (hotovo ? 'locked' : 'hole') + '" data-hole="' + hole + '" style="--fill:' + pct + '%">' +
+      h += '<button class="hole' + (filled === celkem ? ' done' : '') + (rozehrana ? ' rozehrana' : '') + (hotovo ? ' locked' : '') + '" data-act="hole" data-hole="' + hole + '" style="--fill:' + pct + '%">' +
         '<span class="fill"></span>' +
         '<span class="hnum num">' + (hole < 10 ? '0' : '') + hole + '</span>' +
         '<span class="par num">' + filled + '/' + celkem + '</span>' +
@@ -2716,6 +2727,36 @@ function sheetHole() {
       '<span class="v num">' + (v ? fmt(v) : '–') + '</span></button>';
   }).join('');
 
+  /* Ukončená hra: jamky jdou procházet a prohlížet, ale zapisovat už ne. */
+  var zamceno = (g.stav === 'finished');
+  if (zamceno) {
+    var vypis = g.hraci.map(function (jm, i) {
+      var vv = S.scores[key(hole, i, ko)];
+      return '<div class="vysl' + (vv === 1 ? ' eso' : '') + (isNe(vv) ? ' fail' : '') + '">' +
+        avaHtml(jm, avaOf(g, i), 32) +
+        '<span class="jm">' + esc(jm) + '</span>' +
+        '<span class="v num">' + (vv ? fmt(vv) : '–') + '</span></div>';
+    }).join('');
+    return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Jamka ' + hole + '">' +
+      '<div class="grabber"></div><div class="sheet-head">' +
+        '<button class="iconbtn" data-act="prev" ' + (hole === 1 ? 'disabled style="opacity:.4"' : '') + ' aria-label="Předchozí jamka">' + ico('zpet') + '</button>' +
+        '<div class="t" style="text-align:center">Jamka ' + (hole < 10 ? '0' : '') + hole + '</div>' +
+        '<button class="iconbtn" data-act="next" ' + (hole === HOLES ? 'disabled style="opacity:.4"' : '') + ' aria-label="Další jamka">' + ico('vpred') + '</button>' +
+        '<button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button>' +
+      '</div>' +
+      prepinac +
+      pasekJamek(hole) +
+      mapaJamky(hole) +
+      '<div class="vyslgrid">' + vypis + '</div>' +
+      '<div class="hint" style="display:flex;align-items:center;gap:7px">' + ico('zamek', 14) +
+        '<span>Hra je ukončená – skóre jde jen prohlížet. Odemkneš ji tlačítkem „Znovu otevřít“.</span></div>' +
+      '<div class="row" style="margin-top:10px">' +
+        '<button class="btn ghost" data-act="close">Zavřít</button>' +
+        (hole < HOLES ? '<button class="btn" data-act="next">Jamka ' + (hole + 1) + ' →</button>' : '') +
+      '</div>' +
+    '</div></div>';
+  }
+
   var keys = '';
   for (var n = 1; n <= MAX_UDERU; n++) {
     keys += '<button class="key num' + (n === 1 ? ' ace' : '') + (cur === n ? ' sel' : '') + '" data-act="set" data-n="' + n + '">' + n + '</button>';
@@ -3139,7 +3180,6 @@ document.addEventListener('click', function (ev) {
     case 'create': createGame(); break;
 
     case 'hole':
-      if (S.game && S.game.stav === 'finished') { toast('Hra je ukončená, skóre už nejde měnit', true); break; }
       var hn = Number(t.getAttribute('data-hole'));
       holeState.hole = hn;
       holeState.kolo = prvniNedohraneKolo(hn);
