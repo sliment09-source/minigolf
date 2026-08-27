@@ -318,21 +318,30 @@ input[type=text],input[type=date],input[type=number],select{
 .playerrow .rm{width:42px;height:46px;border-radius:11px;border:var(--hrana) solid var(--line);background:var(--card);color:var(--signal);flex:none}
 
 /* ---------- hole entry ---------- */
-.pchips{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;
-  -webkit-overflow-scrolling:touch}
-.pchips::-webkit-scrollbar{display:none}
-.pchip{
-  flex:none;border:var(--hrana) solid var(--line);background:var(--card);border-radius:999px;
-  padding:7px 15px 7px 7px;font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center;
-}
-.pchip .v{font-family:var(--display);font-size:16px;color:var(--ink-soft);min-width:12px}
-.pchip.active{background:var(--cobalt);color:#fff;border-color:var(--cobalt)}
-.pchip.active .v{color:#fff}
-.pchip.filled{border-color:color-mix(in srgb,var(--turf) 50%,transparent)}
-.pchip.filled .v{color:var(--turf)}
+/* Hráč na řadě má vlastní široký řádek se jménem a ±; ostatní jsou jen avatary,
+   aby se osm lidí vešlo na šířku bez posouvání. */
+.narade{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 8px 8px 8px;
+  border-radius:var(--r-s);background:var(--cobalt);color:#fff;
+  border:var(--hrana) solid var(--cobalt);margin-bottom:8px}
+html[data-styl="stadion"] .narade{color:#0A0C0F}
+html[data-styl="bloky"] .narade{border:var(--hrana) solid var(--obrys)}
+html[data-styl="bloky"][data-tmavy] .narade{color:#151310}
+.narade .jm{flex:1;min-width:0;font-weight:700;font-size:17px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.narade .v{font-family:var(--display);font-size:22px;min-width:20px;text-align:center}
+.narade .pcpm{border-color:color-mix(in srgb,#fff 45%,transparent);
+  background:color-mix(in srgb,#fff 18%,transparent);color:inherit}
+
+.pchips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 0 10px}
+.pava{flex:none;width:44px;padding:0;background:none;border:0;color:var(--ink-soft);
+  display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+.pava .ava{opacity:.68;transition:opacity .15s ease}
+.pava .v{font-family:var(--display);font-size:13px;line-height:1;color:var(--ink-soft)}
+.pava.filled .ava{opacity:1}
+.pava.filled .v{color:var(--turf)}
+.pava.fail .v{color:var(--signal)}
 .pchip.fail{border-color:color-mix(in srgb,var(--signal) 55%,transparent)}
 .pchip.fail .v{color:var(--signal)}
-.pchip.active .v,.pchip.active.filled .v,.pchip.active.fail .v{color:#fff}
 
 .keypad{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px}
 .key{
@@ -568,6 +577,118 @@ html[data-tmavy] .porovnani.lepsi{color:var(--turf)}
 .styl .po{display:block;font-size:11.5px;color:var(--ink-soft);line-height:1.3;margin-top:2px}
 .styl.on b{color:var(--cobalt)}
 
+/* Mapka jamky v panelu zápisu: půdorys podělaný podle fotek a náčrtů hřiště.
+   Barvy se míchají z tokenů motivu, takže mapka sedne každému stylu. */
+.mapa{
+  background:color-mix(in srgb,var(--ink) 4%,var(--card));
+  border:var(--hrana,1px) solid var(--obrys);border-radius:var(--r-s);
+  padding:8px 10px 6px;margin-bottom:10px;
+}
+.mapa svg{display:block;max-height:118px;width:auto;max-width:100%;height:auto;margin:0 auto;color:var(--ink)}
+.mapa .tt{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block;
+  vertical-align:-1px;margin-right:6px}
+.mapa .popis{font-size:12px;color:var(--ink-soft);padding-top:6px;margin-top:6px;
+  border-top:1px solid var(--line);text-wrap:pretty}
+.mapa .nej{font-family:var(--display);color:var(--sun);white-space:normal;text-wrap:pretty}
+.mapa.pas .nej{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%}
+.mapa .rek{display:block;margin-top:3px;font-size:11px;color:var(--ink-soft);
+  letter-spacing:.02em}
+
+/* Pásek jamek 01–18 – přehled i navigace v jednom řádku. Hotová zeleně,
+   rozehraná zlatě, nedaná červeně, aktuální plná. */
+.pasek{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch}
+.pasek::-webkit-scrollbar{display:none}
+.hpin{flex:none;width:44px;height:44px;border-radius:13px;
+  border:var(--hrana,1px) solid var(--line);background:var(--card);
+  font-family:var(--display);font-size:14px;color:var(--ink-soft);display:grid;place-items:center}
+.hpin.part{border-color:color-mix(in srgb,var(--sun) 55%,transparent);color:var(--sun)}
+.hpin.done{border-color:color-mix(in srgb,var(--turf) 55%,transparent);
+  background:color-mix(in srgb,var(--turf) 14%,var(--card));color:var(--turf)}
+.hpin.fail{border-color:color-mix(in srgb,var(--signal) 55%,transparent);
+  background:color-mix(in srgb,var(--signal) 12%,var(--card));color:var(--signal)}
+.hpin.now{background:var(--cobalt);border-color:var(--cobalt);color:#fff;font-size:15px}
+html[data-styl="stadion"] .hpin.now{color:#0A0C0F}
+html[data-styl="bloky"] .hpin.now{border:var(--hrana) solid var(--obrys)}
+html[data-styl="bloky"][data-tmavy] .hpin.now{color:#151310}
+
+/* ± u už zapsaného skóre: přepsat 3 na 4 bez otevírání klávesnice.
+   Kolečko zůstává 30 px, ale dotekač má 44 px – mimo něj už leží druhé tlačítko. */
+.pchip.pm{padding-right:0}
+.pcmain{display:flex;gap:8px;align-items:center;background:none;border:0;padding:0;
+  font:inherit;color:inherit;min-height:30px}
+.pcpm{flex:none;width:30px;height:30px;border-radius:50%;margin-left:14px;
+  border:var(--hrana,1px) solid var(--line);background:color-mix(in srgb,var(--ink) 5%,var(--card));
+  color:inherit;display:grid;place-items:center;position:relative}
+.pcpm::before{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;
+  transform:translate(-50%,-50%)}
+.pcpm:last-child{margin-right:8px}
+.pchip.active .pcpm{border-color:color-mix(in srgb,#fff 45%,transparent);
+  background:color-mix(in srgb,#fff 18%,transparent);color:#fff}
+
+/* Vrátit poslední zápis – pásek na šest sekund místo dialogu.
+   Nejčastější chyba je zápis špatnému hráči. */
+.undo{display:flex;align-items:center;gap:9px;width:100%;min-height:44px;margin-top:10px;
+  padding:0 12px;border-radius:var(--r-s);border:var(--hrana,1px) solid var(--obrys);
+  background:color-mix(in srgb,var(--ink) 5%,var(--card));color:var(--ink);
+  font:inherit;font-size:13px;font-weight:600;text-align:left;position:relative;overflow:hidden}
+.undo .tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.undo b{font-weight:800}
+.undo .cas{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--cobalt);
+  transform-origin:left;animation:undoCas 6s linear forwards}
+@keyframes undoCas{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media (prefers-reduced-motion:reduce){.undo .cas{animation:none;transform:scaleX(.4)}}
+
+/* Teplotní mapa jamek – kde hráč v téhle hře ztrácí. Žádné nové číslo k zapisování:
+   počítá se z toho, co už v appce je. */
+.hmgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}
+.hm{border-radius:10px;border:var(--hrana,1px) solid var(--line);padding:6px 4px 5px;
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  background:color-mix(in oklab,var(--h,transparent) 22%,var(--card))}
+.hm .n{font-size:10px;color:var(--ink-soft);line-height:1}
+.hm .v{font-family:var(--display);font-size:17px;color:var(--ink);line-height:1.1}
+.hm .d{font-size:9px;font-weight:800;line-height:1}
+.hm.fail{border-color:color-mix(in srgb,var(--signal) 55%,transparent)}
+.hmleg{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--ink-soft)}
+.hmleg i{flex:1;height:6px;border-radius:999px;
+  background:linear-gradient(90deg,var(--turf),var(--sun),var(--signal))}
+
+/* Mapka se dá schovat: zavřená zůstane jednořádkový pásek s obrysem a názvem,
+   takže i schovaná odpovídá na „která jamka to je“. Ovládá se stejným gestem
+   jako tabule pořadí – úchyt 44 px, tah nebo klepnutí. */
+.mapawrap{position:relative;margin-bottom:10px;
+  transform:translateY(var(--tahm,0px));transition:transform .2s cubic-bezier(.2,.8,.3,1)}
+.mapawrap.tahne{transition:none}
+.mapawrap .mapa{margin-bottom:0}
+.mapabtn{display:block;width:100%;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.mapa.pas{display:flex;align-items:center;gap:10px;padding:8px 11px}
+.mapa.pas svg{width:76px;max-height:40px;margin:0;flex:none}
+.mapa.pas .nm{font-size:13px;font-weight:700;color:var(--ink);flex:1;min-width:0;
+  overflow:hidden;display:flex;flex-direction:column;gap:2px}
+.mapa.pas .nm>span:first-child,.mapa.pas .rek.pas{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mapa .rek.pas{display:block;margin-top:0;font-weight:400;font-size:11px;color:var(--ink-soft)}
+.mapa .rek.pas b{font-family:var(--display);font-weight:400;color:var(--sun)}
+.mapa.pas .nej{font-size:11px}
+.uchytm{width:100%;min-height:44px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:5px;padding:5px 0 3px;touch-action:none;cursor:grab;
+  background:none;border:0;color:var(--ink-soft)}
+.uchytm:active{cursor:grabbing}
+.uchytm .bar{width:40px;height:5px;border-radius:999px;background:var(--line);
+  transition:background .15s ease,width .15s ease}
+.uchytm .lbl{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.uchytm:active .bar,.mapawrap.tahne .uchytm .bar{background:var(--cobalt);width:56px}
+.uchytm:active .lbl,.mapawrap.tahne .uchytm .lbl{color:var(--cobalt)}
+
+/* Klepnutí na mapku = celá obrazovka. Na hřišti se člověk dívá jednou a pořádně. */
+.mapazoom{
+  position:fixed;inset:0;z-index:60;padding:24px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:color-mix(in srgb,var(--paper) 93%,#000);
+}
+.mapazoom svg{display:block;width:100%;max-width:min(560px,92vw);height:auto;max-height:50vh;color:var(--ink)}
+.mapazoom .hl{font-family:var(--display);font-size:24px;letter-spacing:.02em;text-align:center}
+.mapazoom .po{font-size:14px;color:var(--ink-soft);text-align:center;max-width:420px;text-wrap:pretty}
+
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 /* ---------- profilovky ---------- */
@@ -603,6 +724,7 @@ html[data-tmavy] .porovnani.lepsi{color:var(--turf)}
 </style>
 </head>
 <body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs><linearGradient id="jmturf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#59AA5E"/><stop offset="1" stop-color="#43884A"/></linearGradient><linearGradient id="jmramp" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3F8046"/><stop offset="1" stop-color="#7ECB83"/></linearGradient><linearGradient id="jmrampd" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7ECB83"/><stop offset="1" stop-color="#59AA5E"/></linearGradient><linearGradient id="jmhumpx" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4A9450"/><stop offset="0.5" stop-color="#8AD08F"/><stop offset="1" stop-color="#4A9450"/></linearGradient><linearGradient id="jmhumpy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A9450"/><stop offset="0.5" stop-color="#8AD08F"/><stop offset="1" stop-color="#4A9450"/></linearGradient><linearGradient id="jmshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.11"/></linearGradient><radialGradient id="jmmound" cx="0.42" cy="0.35" r="0.72"><stop offset="0" stop-color="#8ED493"/><stop offset="1" stop-color="#43884A"/></radialGradient><linearGradient id="jmrock" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#C3BDAD"/><stop offset="1" stop-color="#8A8477"/></linearGradient><linearGradient id="jmsteel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C6CBD0"/><stop offset="1" stop-color="#8E9398"/></linearGradient><linearGradient id="jmbrick" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C06848"/><stop offset="1" stop-color="#9C4A31"/></linearGradient><linearGradient id="jmsalmon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EDAA7C"/><stop offset="1" stop-color="#D0895B"/></linearGradient><linearGradient id="jmredw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B23540"/><stop offset="1" stop-color="#82202A"/></linearGradient></defs></svg>
 
 <div id="root"></div>
 <div id="overlay"></div>
@@ -1024,6 +1146,7 @@ function tichyRefresh(force) {
     if (typeof d.rev === 'number') znamyRev = d.rev;
     S.game = d.game;
     S.scores = nove;
+    rekordyCache = null;
     LS.set('last', { game: d.game, skore: d.skore });
     LS.set('g:' + id, { game: d.game, skore: d.skore });
     S.err = null;
@@ -1033,8 +1156,21 @@ function tichyRefresh(force) {
   }).catch(function () { /* výpadek sítě tiše ignorujeme, zkusí se znovu */ });
 }
 /* ---------------------- zápis skóre ---------------------- */
+/* Poslední zápis si držíme šest sekund, aby se dal vrátit jedním dotekem. */
+var undoZapis = null, undoTimer = null;
+
+function zapamatujUndo(hole, player, kolo, prev, jmeno) {
+  undoZapis = { hole: hole, player: player, kolo: kolo, prev: prev, jmeno: jmeno };
+  if (undoTimer) clearTimeout(undoTimer);
+  undoTimer = setTimeout(function () {
+    undoZapis = null;
+    if (openSheet === sheetHole) paint({ sheetOnly: true });
+  }, 6000);
+}
+
 function setScore(hole, player, strokes, kolo) {
   var g = S.game; if (!g) return;
+  rekordyCache = null;
   if (g.stav === 'finished') { toast('Hra je ukončená, skóre už nejde měnit', true); return; }
   var ko = kolo || 1;
   var k = key(hole, player, ko);
@@ -1059,6 +1195,7 @@ function paint(opts) {
   opts = opts || {};
   if (!opts.sheetOnly) renderRoot();
   renderOverlay();
+  centrujPasek();
   if (afterPaint) { var f = afterPaint; afterPaint = null; f(); }
 }
 
@@ -1449,7 +1586,8 @@ function viewGame() {
     if (tabuleOtevrena()) {
       h += '<div class="tabulewrap" data-tabulewrap>' + tabule(g, st) + porovnani(g, st) +
         '<div class="uchyt" data-drag="tabule" role="button" tabindex="0" data-act="tabule" ' +
-        'aria-label="Sbalit tabuli"><span class="lbl">Zasuň tahem nahoru</span><span class="bar"></span></div>' +
+        'aria-label="Zpět na kartičky"><span class="bar"></span>' +
+        '<span class="lbl">Tahem dolů zpět na kartičky</span></div>' +
         '</div>';
     } else {
       h += '<div class="tabulewrap" data-tabulewrap><div class="board">';
@@ -1457,7 +1595,9 @@ function viewGame() {
       var extra = [];
       if (r.aces) extra.push(r.aces + '× eso');
       if (r.ne) extra.push(r.ne + '× NE');
-      h += '<div class="lb' + (i === 0 && r.jamky ? ' first' : '') + '" data-lb="' + g.id + ':' + r.i + '">' +
+      h += '<div class="lb' + (i === 0 && r.jamky ? ' first' : '') + '" data-lb="' + g.id + ':' + r.i + '" ' +
+        'data-act="lbHrac" data-p="' + r.i + '" role="button" tabindex="0" ' +
+        'aria-label="Průběh hráče ' + esc(r.jmeno) + ' po jamkách">' +
         '<div class="lbtop">' + avaHtml(r.jmeno, avaOf(g, r.i), 34) +
           '<span class="pos">' + (r.jamky ? r.poradi + '.' : '–') + '</span></div>' +
         '<div class="nm">' + esc(r.jmeno) + '</div>' +
@@ -1468,8 +1608,8 @@ function viewGame() {
       });
       h += '</div>' + porovnani(g, st) +
         '<div class="uchyt" data-drag="tabule" role="button" tabindex="0" data-act="tabule" ' +
-        'aria-label="Rozbalit tabuli s průběhem"><span class="bar"></span>' +
-        '<span class="lbl">Vytažením dolů průběh po jamkách</span></div>' +
+        'aria-label="Zobrazit průběh po jamkách"><span class="lbl">Tahem nahoru průběh po jamkách</span>' +
+        '<span class="bar"></span></div>' +
         '</div>';
     }
   }
@@ -1736,6 +1876,67 @@ function sheetHrac() {
   return h + '</div></div>';
 }
 var detailHrace = 0;
+
+/* Teplotní mapa jamek pro jednoho hráče v rozehrané hře: kde ztrácí proti partě.
+   Otevírá se klepnutím na kartičku v pořadí. */
+var detailHraceHra = 0;
+
+function sheetHraHrac() {
+  var g = S.game;
+  if (!g) return '';
+  var pi = detailHraceHra, kola = seznamKol(g), jm = g.hraci[pi] || '';
+  var dlazdice = '', ztraty = [], soucet = 0, odehrano = 0, esa = 0;
+
+  for (var hh = 1; hh <= HOLES; hh++) {
+    var moje = 0, pocet = 0, mane = false;
+    for (var ki = 0; ki < kola.length; ki++) {
+      var v = S.scores[key(hh, pi, kola[ki])];
+      if (v) { moje += v; pocet++; if (isNe(v)) mane = true; if (v === 1) esa++; }
+    }
+    var muj = pocet ? moje / pocet : null;
+    var skup = prumerJamky(hh);
+    if (pocet) { soucet += moje; odehrano += pocet; }
+    var rozdil = (muj != null && skup != null) ? muj - skup : null;
+    if (rozdil != null && rozdil >= .5) ztraty.push({ h: hh, d: rozdil });
+
+    var tt = heatT(muj);
+    dlazdice += '<div class="hm' + (mane ? ' fail' : '') + '"' +
+      (tt == null ? '' : ' style="--h:' + heatBarva(tt) + '"') + '>' +
+      '<span class="n num">' + (hh < 10 ? '0' : '') + hh + '</span>' +
+      '<span class="v num">' + (pocet ? (mane ? 'NE' : moje) : '–') + '</span>' +
+      (rozdil == null || Math.abs(rozdil) < .5
+        ? '<span class="d"> </span>'
+        : '<span class="d num" style="color:' + (rozdil > 0 ? 'var(--signal)' : 'var(--turf)') + '">' +
+            (rozdil > 0 ? '+' : '−') + Math.abs(rozdil).toFixed(1).replace('.', ',') + '</span>') +
+    '</div>';
+  }
+
+  ztraty.sort(function (a, b) { return b.d - a.d; });
+  var nej = ztraty.slice(0, 3).map(function (z) { return (z.h < 10 ? '0' : '') + z.h; });
+
+  return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Průběh hráče">' +
+    '<div class="grabber"></div><div class="sheet-head">' +
+      '<button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button>' +
+      '<div class="t" style="display:flex;align-items:center;gap:10px">' +
+        avaHtml(jm, avaOf(g, pi), 38) + esc(jm) + '</div>' +
+    '</div>' +
+    '<div class="statgrid">' +
+      '<div class="stat"><div class="v num">' + (odehrano ? soucet : '–') + '</div><div class="k">Bodů zapsáno</div></div>' +
+      '<div class="stat"><div class="v num">' + (odehrano ? (soucet / odehrano).toFixed(2).replace('.', ',') : '–') + '</div>' +
+        '<div class="k">Průměr na jamku</div></div>' +
+      '<div class="stat"><div class="v num" style="color:var(--sun)">' + esa + '</div><div class="k">Es</div></div>' +
+      '<div class="stat"><div class="v num">' + odehrano + '</div><div class="k">Zapsaných jamek</div></div>' +
+    '</div>' +
+    '<h2>Kde ztrácíš</h2>' +
+    '<div class="hmgrid">' + dlazdice + '</div>' +
+    '<div class="hmleg"><span>lépe</span><i></i><span>hůř</span></div>' +
+    '<div class="hint">' + (nej.length
+      ? 'Proti zbytku party nejvíc ztrácíš na ' + (nej.length === 1 ? 'jamce ' : 'jamkách ') + nej.join(', ') +
+        '. Malé číslo v dlaždici je rozdíl proti průměru party.'
+      : 'Proti zbytku party zatím nikde výrazně neztrácíš.') + '</div>' +
+    '<div style="margin-top:16px"><button class="btn ghost" data-act="close">Zavřít</button></div>' +
+  '</div></div>';
+}
 
 function viewKariera() {
   var k = kariera(S.games);
@@ -2235,7 +2436,238 @@ function cardFooter(g) {
 }
 
 /* ---------- panel jamky ---------- */
+/* ---------- mapky jamek ----------
+   Ilustrace půdorysů všech 18 jamek: pohled shora, odpaliště vlevo, jamka vpravo.
+   Gradienty jsou nadefinované jednou v <svg> spritu na začátku dokumentu. */
+var MAPY = [
+  null,
+  { nm: 'Můstek', po: 'Cihlový můstek s průchodem uprostřed dráhy.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><rect x="298.5" y="112" width="17" height="49" rx="2" fill="#000" opacity="0.16"/><rect x="298.5" y="193" width="17" height="49" rx="2" fill="#000" opacity="0.16"/><rect x="291.5" y="105" width="17" height="49" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="292.5" y1="116" x2="307.5" y2="116" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="292.5" y1="127" x2="307.5" y2="127" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="292.5" y1="138" x2="307.5" y2="138" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="292.5" y1="149" x2="307.5" y2="149" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="291.5" y="186" width="17" height="49" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="292.5" y1="197" x2="307.5" y2="197" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="292.5" y1="208" x2="307.5" y2="208" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="292.5" y1="219" x2="307.5" y2="219" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="292.5" y1="230" x2="307.5" y2="230" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Nájezd', po: 'Šikmá rampa zvedá dráhu do vyššího greenu.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="300.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="300.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="300.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><rect x="180" y="114" width="156" height="112" fill="url(#jmramp)"/><rect x="180" y="114" width="156" height="112" fill="url(#jmshade)"/><path d="M 195.07999999999998 148.0 L 217.07999999999998 170.0 L 195.07999999999998 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 223.16 148.0 L 245.16 170.0 L 223.16 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 251.24 148.0 L 273.24 170.0 L 251.24 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="322" y="114" width="9" height="112" fill="#9E2B33"/><rect x="331" y="114" width="5" height="112" fill="#6F1B22"/><path d="M 344 170 Q 387.0 92 430 170" fill="none" stroke="#8E9A88" stroke-width="4" stroke-dasharray="1 13" stroke-linecap="round"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Kameny', po: 'Čtyři kamenné hromady střídavě u obrub — slalom.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><ellipse cx="162.8" cy="206.5" rx="13.5" ry="11.6" fill="#000" opacity="0.15"/><ellipse cx="129.3" cy="208.0" rx="11.8" ry="10.1" fill="#000" opacity="0.15"/><ellipse cx="149.8" cy="209.8" rx="9.9" ry="8.5" fill="#000" opacity="0.15"/><ellipse cx="124.4" cy="210.0" rx="14.9" ry="12.8" fill="#000" opacity="0.15"/><ellipse cx="116.7" cy="214.4" rx="11.1" ry="9.5" fill="#000" opacity="0.15"/><ellipse cx="129.1" cy="217.9" rx="12.4" ry="10.6" fill="#000" opacity="0.15"/><ellipse cx="158.8" cy="201.5" rx="12.8" ry="10.9" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="125.3" cy="203.0" rx="11.2" ry="9.5" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="145.8" cy="204.8" rx="9.4" ry="8.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="120.4" cy="205.0" rx="14.2" ry="12.1" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="112.7" cy="209.4" rx="10.6" ry="9.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="125.1" cy="212.9" rx="11.8" ry="10.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="222.3" cy="133.5" rx="10.0" ry="8.6" fill="#000" opacity="0.15"/><ellipse cx="216.1" cy="135.3" rx="13.6" ry="11.6" fill="#000" opacity="0.15"/><ellipse cx="201.2" cy="143.2" rx="9.7" ry="8.3" fill="#000" opacity="0.15"/><ellipse cx="202.1" cy="143.8" rx="11.8" ry="10.1" fill="#000" opacity="0.15"/><ellipse cx="210.5" cy="145.8" rx="15.4" ry="13.2" fill="#000" opacity="0.15"/><ellipse cx="221.8" cy="150.2" rx="10.2" ry="8.8" fill="#000" opacity="0.15"/><ellipse cx="218.3" cy="128.5" rx="9.5" ry="8.1" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="212.1" cy="130.3" rx="12.9" ry="11.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="197.2" cy="138.2" rx="9.2" ry="7.8" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="198.1" cy="138.8" rx="11.2" ry="9.5" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="206.5" cy="140.8" rx="14.7" ry="12.5" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="217.8" cy="145.2" rx="9.7" ry="8.3" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="324.4" cy="198.1" rx="11.4" ry="9.7" fill="#000" opacity="0.15"/><ellipse cx="306.1" cy="207.2" rx="13.2" ry="11.3" fill="#000" opacity="0.15"/><ellipse cx="290.3" cy="207.3" rx="13.4" ry="11.5" fill="#000" opacity="0.15"/><ellipse cx="305.3" cy="208.3" rx="15.3" ry="13.1" fill="#000" opacity="0.15"/><ellipse cx="285.1" cy="213.8" rx="13.8" ry="11.8" fill="#000" opacity="0.15"/><ellipse cx="282.3" cy="217.6" rx="15.5" ry="13.3" fill="#000" opacity="0.15"/><ellipse cx="320.4" cy="193.1" rx="10.8" ry="9.2" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="302.1" cy="202.2" rx="12.5" ry="10.6" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="286.3" cy="202.3" rx="12.8" ry="10.9" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="301.3" cy="203.3" rx="14.5" ry="12.4" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="281.1" cy="208.8" rx="13.2" ry="11.2" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="278.3" cy="212.6" rx="14.8" ry="12.6" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="396.1" cy="132.3" rx="11.2" ry="9.6" fill="#000" opacity="0.15"/><ellipse cx="409.6" cy="136.1" rx="10.9" ry="9.3" fill="#000" opacity="0.15"/><ellipse cx="370.2" cy="137.0" rx="14.1" ry="12.1" fill="#000" opacity="0.15"/><ellipse cx="378.5" cy="141.5" rx="14.7" ry="12.6" fill="#000" opacity="0.15"/><ellipse cx="369.3" cy="143.7" rx="10.8" ry="9.3" fill="#000" opacity="0.15"/><ellipse cx="376.5" cy="147.1" rx="13.8" ry="11.8" fill="#000" opacity="0.15"/><ellipse cx="392.1" cy="127.3" rx="10.7" ry="9.1" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="405.6" cy="131.1" rx="10.4" ry="8.8" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="366.2" cy="132.0" rx="13.4" ry="11.4" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="374.5" cy="136.5" rx="14.0" ry="11.9" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="365.3" cy="138.7" rx="10.3" ry="8.7" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><ellipse cx="372.5" cy="142.1" rx="13.1" ry="11.1" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="1.4"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Zatáčka s balvanem', po: 'Zalomená dráha, balvan sedí v ohybu.', vb: '0 0 640 340',
+    kr: '<rect x="40.0" y="40.0" width="480.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="432.0" y="100.0" width="88.0" height="128.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="551.8,259.4 507.4,303.8 444.6,303.8 400.2,259.4 400.2,196.6 444.6,152.2 507.4,152.2 551.8,196.6" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="40.0" y="40.0" width="480.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="432.0" y="100.0" width="88.0" height="128.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="551.8,259.4 507.4,303.8 444.6,303.8 400.2,259.4 400.2,196.6 444.6,152.2 507.4,152.2 551.8,196.6" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="40.0" y="40.0" width="480.0" height="112.0" fill="url(#jmturf)" stroke="none"/><rect x="432.0" y="100.0" width="88.0" height="128.0" fill="url(#jmturf)" stroke="none"/><polygon points="551.8,259.4 507.4,303.8 444.6,303.8 400.2,259.4 400.2,196.6 444.6,152.2 507.4,152.2 551.8,196.6" fill="url(#jmturf)" stroke="none"/><clipPath id="jmcl4"><rect x="40.0" y="40.0" width="480.0" height="112.0" fill="#fff"/><rect x="432.0" y="100.0" width="88.0" height="128.0" fill="#fff"/><polygon points="551.8,259.4 507.4,303.8 444.6,303.8 400.2,259.4 400.2,196.6 444.6,152.2 507.4,152.2 551.8,196.6" fill="#fff"/></clipPath><g clip-path="url(#jmcl4)"><polygon points="422.0,39.0 538.0,39.0 538.0,127.0" fill="#000" opacity="0.18"/><polygon points="414.0,30.0 530.0,30.0 530.0,118.0" fill="#DFDACE" stroke="#A79F90" stroke-width="3" stroke-linejoin="round"/><line x1="414" y1="30" x2="530" y2="118" stroke="#A79F90" stroke-width="2.5" opacity="0.8"/></g><rect x="50" y="56.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="57" cy="65.0" r="2.1" fill="#6E7378"/><circle cx="95" cy="65.0" r="2.1" fill="#6E7378"/><circle cx="57" cy="127.0" r="2.1" fill="#6E7378"/><circle cx="95" cy="127.0" r="2.1" fill="#6E7378"/><circle cx="476" cy="250" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="476" cy="250" r="13" fill="#141C11"/><ellipse cx="473.5" cy="247" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Vlna do kopce', po: 'Dráha stoupá přes oblou vlnu, jamka leží za ní.', vb: '0 0 640 340',
+    kr: '<path d="M 36 114 L 500 114 A 56 56 0 0 1 500 226 L 36 226 Z" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><path d="M 36 114 L 500 114 A 56 56 0 0 1 500 226 L 36 226 Z" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><path d="M 36 114 L 500 114 A 56 56 0 0 1 500 226 L 36 226 Z" fill="url(#jmturf)" stroke="none"/><clipPath id="jmcl5"><path d="M 36 114 L 500 114 A 56 56 0 0 1 500 226 L 36 226 Z" fill="#fff"/></clipPath><g clip-path="url(#jmcl5)"><rect x="296" y="114" width="260" height="112" fill="url(#jmramp)"/><rect x="296" y="114" width="260" height="112" fill="url(#jmshade)"/><path d="M 345.4 148.0 L 367.4 170.0 L 345.4 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 407.79999999999995 148.0 L 429.79999999999995 170.0 L 407.79999999999995 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 473 154 A 21 21 0 0 0 473 196 Z" fill="#000" opacity="0.18"/><path d="M 468 149 A 21 21 0 0 0 468 191 Z" fill="#18220F"/><path d="M 468 149 A 21 21 0 0 0 468 191" fill="none" stroke="#6E7378" stroke-width="8"/><path d="M 468 149 A 21 21 0 0 0 468 191" fill="none" stroke="url(#jmsteel)" stroke-width="5"/><path d="M 500 121 A 49 49 0 0 1 500 219" fill="none" stroke="#767B80" stroke-width="11"/><path d="M 500 121 A 49 49 0 0 1 500 219" fill="none" stroke="url(#jmsteel)" stroke-width="7"/></g><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/>' },
+  { nm: 'Rampa s brankou', po: 'Krátká rampa, na hřebeni branka na šířku míčku.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="494.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="494.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="494.0" height="112.0" fill="url(#jmturf)" stroke="none"/><clipPath id="jmcl6"><rect x="36.0" y="114.0" width="494.0" height="112.0" fill="#fff"/></clipPath><g clip-path="url(#jmcl6)"><rect x="230" y="114" width="300" height="112" fill="url(#jmramp)"/><rect x="230" y="114" width="300" height="112" fill="url(#jmshade)"/><path d="M 289.0 148.0 L 311.0 170.0 L 289.0 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 361.0 148.0 L 383.0 170.0 L 361.0 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><polygon points="428.0,131.0 456.0,151.0 456.0,146.0 428.0,126.0" fill="#000" opacity="0.2"/><polygon points="424.0,126.0 452.0,146.0 452.0,141.0 424.0,121.0" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="1.4" stroke-linejoin="round"/><polygon points="428.0,219.0 456.0,199.0 456.0,204.0 428.0,224.0" fill="#000" opacity="0.2"/><polygon points="424.0,214.0 452.0,194.0 452.0,199.0 424.0,219.0" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="1.4" stroke-linejoin="round"/><rect x="455.0" y="142.0" width="22" height="66" rx="4" fill="#000" opacity="0.16"/><rect x="451.0" y="137.0" width="22" height="66" rx="4" fill="#1E2A17" stroke="#6E7378" stroke-width="3"/><rect x="454.0" y="140.0" width="16" height="60" rx="2" fill="none" stroke="#fff" stroke-opacity="0.10" stroke-width="2"/><rect x="487.0" y="156.0" width="40" height="40" rx="3" fill="#000" opacity="0.16"/><rect x="482.0" y="150.0" width="40" height="40" rx="3" fill="#CFC9BA" stroke="#7F7A6D" stroke-width="2"/><circle cx="505.9" cy="177.7" r="4.2" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="516.2" cy="177.7" r="4.4" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="486.9" cy="168.9" r="4.5" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="506.8" cy="182.8" r="2.8" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="501.0" cy="161.9" r="3.7" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="504.4" cy="154.4" r="3.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="494.9" cy="183.3" r="4.1" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="491.1" cy="179.5" r="2.9" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="505.8" cy="158.1" r="2.6" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="513.9" cy="160.7" r="3.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="517.4" cy="181.9" r="3.2" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="516.8" cy="171.3" r="4.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="492.6" cy="184.1" r="4.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="516.9" cy="182.6" r="3.2" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/></g><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/>' },
+  { nm: 'Kopeček', po: 'Kopeček uprostřed, po obou stranách kamenné břehy.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><clipPath id="jmcl7"><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="#fff"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="#fff"/></clipPath><g clip-path="url(#jmcl7)"><rect x="276" y="136" width="72" height="68" fill="url(#jmhumpx)"/><rect x="276" y="136" width="72" height="68" fill="url(#jmshade)"/><line x1="312.0" y1="136" x2="312.0" y2="204" stroke="#fff" stroke-opacity="0.35" stroke-width="2.5"/><rect x="283" y="113" width="72" height="31" rx="3" fill="#000" opacity="0.18"/><rect x="276" y="105" width="72" height="31" rx="3" fill="#DFDACE" stroke="#A79F90" stroke-width="2.5"/><rect x="283" y="212" width="72" height="31" rx="3" fill="#000" opacity="0.18"/><rect x="276" y="204" width="72" height="31" rx="3" fill="#DFDACE" stroke="#A79F90" stroke-width="2.5"/></g><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Rampa se dvěma jamkami', po: 'Šikmá plocha, hrbol s jamkou a druhá jamka nahoře.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="568.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="568.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="568.0" height="112.0" fill="url(#jmturf)" stroke="none"/><rect x="130" y="114" width="474" height="112" fill="url(#jmramp)"/><rect x="130" y="114" width="474" height="112" fill="url(#jmshade)"/><path d="M 230.76 148.0 L 252.76 170.0 L 230.76 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 344.52 148.0 L 366.52 170.0 L 344.52 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="330" y="143" width="140" height="54" rx="6" fill="url(#jmhumpy)"/><line x1="336" y1="170.0" x2="464" y2="170.0" stroke="#fff" stroke-opacity="0.3" stroke-width="2.5"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="400" cy="170" r="16" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="400" cy="170" r="12" fill="#141C11"/><ellipse cx="397.5" cy="167" rx="7.4399999999999995" ry="6.0" fill="#000" opacity="0.55"/><circle cx="542" cy="170" r="16" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="542" cy="170" r="12" fill="#141C11"/><ellipse cx="539.5" cy="167" rx="7.4399999999999995" ry="6.0" fill="#000" opacity="0.55"/>' },
+  { nm: 'Skalní úžina', po: 'Kameny zužují dráhu do jedné mezery.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><rect x="273.0" y="112" width="20" height="43" rx="2" fill="#000" opacity="0.16"/><rect x="273.0" y="199" width="20" height="43" rx="2" fill="#000" opacity="0.16"/><rect x="266.0" y="105" width="20" height="43" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="267.0" y1="116" x2="285.0" y2="116" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="267.0" y1="127" x2="285.0" y2="127" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="267.0" y1="138" x2="285.0" y2="138" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="266.0" y="192" width="20" height="43" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="267.0" y1="203" x2="285.0" y2="203" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="267.0" y1="214" x2="285.0" y2="214" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="267.0" y1="225" x2="285.0" y2="225" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Krátká rampa', po: 'Jen rampa a jamka za hřebenem — nejkratší dráha.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="416.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="416.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="416.0" height="112.0" fill="url(#jmturf)" stroke="none"/><clipPath id="jmcl10"><rect x="36.0" y="114.0" width="416.0" height="112.0" fill="#fff"/></clipPath><g clip-path="url(#jmcl10)"><rect x="128" y="114" width="324" height="112" fill="url(#jmramp)"/><rect x="128" y="114" width="324" height="112" fill="url(#jmshade)"/><path d="M 173.32 148.0 L 195.32 170.0 L 173.32 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 231.64 148.0 L 253.64 170.0 L 231.64 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 289.96 148.0 L 311.96 170.0 L 289.96 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="418.0" y="123.0" width="20" height="104" rx="4" fill="#000" opacity="0.16"/><rect x="414.0" y="118.0" width="20" height="104" rx="4" fill="#1E2A17" stroke="#6E7378" stroke-width="3"/><rect x="417.0" y="121.0" width="14" height="98" rx="2" fill="none" stroke="#fff" stroke-opacity="0.10" stroke-width="2"/></g><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/>' },
+  { nm: 'Dvě přepážky', po: 'Dvě cihlové přepážky, průchod uprostřed obou.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><rect x="188.5" y="112" width="17" height="46" rx="2" fill="#000" opacity="0.16"/><rect x="188.5" y="196" width="17" height="46" rx="2" fill="#000" opacity="0.16"/><rect x="181.5" y="105" width="17" height="46" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="182.5" y1="116" x2="197.5" y2="116" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="182.5" y1="127" x2="197.5" y2="127" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="182.5" y1="138" x2="197.5" y2="138" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="181.5" y="189" width="17" height="46" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="182.5" y1="200" x2="197.5" y2="200" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="182.5" y1="211" x2="197.5" y2="211" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="182.5" y1="222" x2="197.5" y2="222" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="328.5" y="112" width="17" height="46" rx="2" fill="#000" opacity="0.16"/><rect x="328.5" y="196" width="17" height="46" rx="2" fill="#000" opacity="0.16"/><rect x="321.5" y="105" width="17" height="46" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="322.5" y1="116" x2="337.5" y2="116" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="322.5" y1="127" x2="337.5" y2="127" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="322.5" y1="138" x2="337.5" y2="138" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="321.5" y="189" width="17" height="46" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="322.5" y1="200" x2="337.5" y2="200" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="322.5" y1="211" x2="337.5" y2="211" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="322.5" y1="222" x2="337.5" y2="222" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Strmá rampa', po: 'Strmá rampa s troubou na hřebeni.', vb: '0 0 640 340',
+    kr: '<path d="M 36 114 L 470 114 A 56 56 0 0 1 470 226 L 36 226 Z" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><path d="M 36 114 L 470 114 A 56 56 0 0 1 470 226 L 36 226 Z" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><path d="M 36 114 L 470 114 A 56 56 0 0 1 470 226 L 36 226 Z" fill="url(#jmturf)" stroke="none"/><clipPath id="jmcl12"><path d="M 36 114 L 470 114 A 56 56 0 0 1 470 226 L 36 226 Z" fill="#fff"/></clipPath><g clip-path="url(#jmcl12)"><rect x="196" y="114" width="160" height="112" fill="url(#jmramp)"/><rect x="356" y="114" width="170" height="112" fill="#7ECB83"/><rect x="196" y="114" width="330" height="112" fill="url(#jmshade)"/><path d="M 211.8 148.0 L 233.8 170.0 L 211.8 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 240.6 148.0 L 262.6 170.0 L 240.6 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 269.4 148.0 L 291.4 170.0 L 269.4 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><line x1="356" y1="114" x2="356" y2="226" stroke="#fff" stroke-opacity="0.5" stroke-width="3"/><rect x="355.5" y="112" width="15" height="75" rx="2" fill="#000" opacity="0.16"/><rect x="348.5" y="105" width="15" height="75" rx="2" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/></g><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="404" cy="148" r="16" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="404" cy="148" r="12" fill="#141C11"/><ellipse cx="401.5" cy="145" rx="7.4399999999999995" ry="6.0" fill="#000" opacity="0.55"/>' },
+  { nm: 'Nájezd do zatáčky', po: 'Rampa v ohybu, green až za zalomením.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><rect x="180" y="114" width="140" height="112" fill="url(#jmramp)"/><rect x="320" y="114" width="140" height="112" fill="#7ECB83"/><rect x="180" y="114" width="280" height="112" fill="url(#jmshade)"/><path d="M 192.2 148.0 L 214.2 170.0 L 192.2 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 217.4 148.0 L 239.4 170.0 L 217.4 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 242.6 148.0 L 264.6 170.0 L 242.6 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><line x1="320" y1="114" x2="320" y2="226" stroke="#fff" stroke-opacity="0.5" stroke-width="3"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="#7ECB83"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmshade)"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Jamka na plošině', po: 'Dráha vyjede na plošinu, jamka je hned na hraně.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="520.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="520.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="520.0" height="112.0" fill="url(#jmturf)" stroke="none"/><rect x="230" y="114" width="326" height="112" fill="url(#jmramp)"/><rect x="230" y="114" width="326" height="112" fill="url(#jmshade)"/><path d="M 275.68 148.0 L 297.68 170.0 L 275.68 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 334.36 148.0 L 356.36 170.0 L 334.36 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 393.03999999999996 148.0 L 415.03999999999996 170.0 L 393.03999999999996 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="482" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="482" cy="170" r="13" fill="#141C11"/><ellipse cx="479.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Branka před greenem', po: 'Úzká branka těsně před greenem.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><rect x="290.5" y="112" width="17" height="46" rx="2" fill="#000" opacity="0.16"/><rect x="290.5" y="196" width="17" height="46" rx="2" fill="#000" opacity="0.16"/><rect x="283.5" y="105" width="17" height="46" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="284.5" y1="116" x2="299.5" y2="116" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="284.5" y1="127" x2="299.5" y2="127" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="284.5" y1="138" x2="299.5" y2="138" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="283.5" y="189" width="17" height="46" rx="2" fill="url(#jmbrick)" stroke="#8A3F28" stroke-width="2"/><line x1="284.5" y1="200" x2="299.5" y2="200" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="284.5" y1="211" x2="299.5" y2="211" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><line x1="284.5" y1="222" x2="299.5" y2="222" stroke="#8A3F28" stroke-width="1.4" opacity="0.45"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Banka se srpkem', po: 'Klopená zatáčka; míček musí objet srpek.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="534.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="534.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="534.0" height="112.0" fill="url(#jmturf)" stroke="none"/><clipPath id="jmcl16"><rect x="36.0" y="114.0" width="534.0" height="112.0" fill="#fff"/></clipPath><g clip-path="url(#jmcl16)"><rect x="310" y="114" width="138" height="112" fill="url(#jmhumpx)"/><rect x="310" y="114" width="138" height="112" fill="url(#jmshade)"/><line x1="379.0" y1="114" x2="379.0" y2="226" stroke="#fff" stroke-opacity="0.35" stroke-width="2.5"/></g><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="379" cy="170" r="16" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="379" cy="170" r="12" fill="#141C11"/><ellipse cx="376.5" cy="167" rx="7.4399999999999995" ry="6.0" fill="#000" opacity="0.55"/>' },
+  { nm: 'Rampa s brankou nahoře', po: 'Rampa a na jejím konci kamenná branka.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><clipPath id="jmcl17"><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="#fff"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="#fff"/></clipPath><g clip-path="url(#jmcl17)"><rect x="186" y="114" width="158" height="112" fill="url(#jmramp)"/><rect x="344" y="114" width="56" height="112" fill="#7ECB83"/><rect x="186" y="114" width="214" height="112" fill="url(#jmshade)"/><path d="M 210.92 148.0 L 232.92 170.0 L 210.92 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M 248.83999999999997 148.0 L 270.84 170.0 L 248.83999999999997 192.0" fill="none" stroke="#fff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="400" y="114" width="46" height="112" fill="url(#jmrampd)"/><rect x="400" y="114" width="46" height="112" fill="url(#jmshade)"/><polygon points="302.0,131.0 330.0,151.0 330.0,146.0 302.0,126.0" fill="#000" opacity="0.2"/><polygon points="298.0,126.0 326.0,146.0 326.0,141.0 298.0,121.0" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="1.4" stroke-linejoin="round"/><polygon points="302.0,219.0 330.0,199.0 330.0,204.0 302.0,224.0" fill="#000" opacity="0.2"/><polygon points="298.0,214.0 326.0,194.0 326.0,199.0 298.0,219.0" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="1.4" stroke-linejoin="round"/><rect x="330.0" y="143.0" width="20" height="64" rx="4" fill="#000" opacity="0.16"/><rect x="326.0" y="138.0" width="20" height="64" rx="4" fill="#1E2A17" stroke="#6E7378" stroke-width="3"/><rect x="329.0" y="141.0" width="14" height="58" rx="2" fill="none" stroke="#fff" stroke-opacity="0.10" stroke-width="2"/><rect x="358.0" y="157.0" width="38" height="38" rx="3" fill="#000" opacity="0.16"/><rect x="353.0" y="151.0" width="38" height="38" rx="3" fill="#CFC9BA" stroke="#7F7A6D" stroke-width="2"/><circle cx="375.7" cy="177.3" r="4.2" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="385.3" cy="177.2" r="4.4" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="357.9" cy="169.0" r="4.5" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="376.5" cy="182.0" r="2.8" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="371.1" cy="162.4" r="3.7" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="374.2" cy="155.4" r="3.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="365.4" cy="182.5" r="4.1" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="361.8" cy="178.9" r="2.9" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="375.5" cy="158.8" r="2.6" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="383.1" cy="161.3" r="3.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="386.5" cy="181.2" r="3.2" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="385.8" cy="171.2" r="4.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="363.1" cy="183.2" r="4.0" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/><circle cx="386.0" cy="181.8" r="3.2" fill="url(#jmrock)" stroke="#7F7A6D" stroke-width="0.9"/></g><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' },
+  { nm: 'Slalom', po: 'Čtyři přepážky střídavě zleva a zprava.', vb: '0 0 640 340',
+    kr: '<rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#A79F90" stroke-width="29" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="none" stroke="#DFDACE" stroke-width="25" stroke-linejoin="round"/><rect x="36.0" y="114.0" width="424.0" height="112.0" fill="url(#jmturf)" stroke="none"/><polygon points="589.3,203.7 541.7,251.3 474.3,251.3 426.7,203.7 426.7,136.3 474.3,88.7 541.7,88.7 589.3,136.3" fill="url(#jmturf)" stroke="none"/><rect x="130.5" y="112" width="17" height="45" rx="2" fill="#000" opacity="0.16"/><rect x="130.5" y="197" width="17" height="45" rx="2" fill="#000" opacity="0.16"/><rect x="123.5" y="105" width="17" height="45" rx="2" fill="url(#jmsalmon)" stroke="#B87549" stroke-width="2"/><rect x="123.5" y="190" width="17" height="45" rx="2" fill="url(#jmsalmon)" stroke="#B87549" stroke-width="2"/><rect x="214.5" y="112" width="17" height="79" rx="2" fill="#000" opacity="0.16"/><rect x="207.5" y="105" width="17" height="79" rx="2" fill="url(#jmsalmon)" stroke="#B87549" stroke-width="2"/><rect x="298.5" y="163" width="17" height="79" rx="2" fill="#000" opacity="0.16"/><rect x="291.5" y="156" width="17" height="79" rx="2" fill="url(#jmsalmon)" stroke="#B87549" stroke-width="2"/><rect x="382.5" y="112" width="17" height="79" rx="2" fill="#000" opacity="0.16"/><rect x="375.5" y="105" width="17" height="79" rx="2" fill="url(#jmsalmon)" stroke="#B87549" stroke-width="2"/><rect x="46" y="130.0" width="52" height="80" rx="3" fill="url(#jmsteel)" stroke="#6E7378" stroke-width="2"/><circle cx="53" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="139.0" r="2.1" fill="#6E7378"/><circle cx="53" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="91" cy="201.0" r="2.1" fill="#6E7378"/><circle cx="548" cy="170" r="17" fill="#EDE9DE" stroke="#B4AC9C" stroke-width="1.5"/><circle cx="548" cy="170" r="13" fill="#141C11"/><ellipse cx="545.5" cy="167" rx="8.06" ry="6.5" fill="#000" opacity="0.55"/>' }
+];
+
+function mapaJamky(hole) {
+  var m = MAPY[hole];
+  if (!m) return '';
+  var open = mapaOtevrena(hole), rek = rekordJamky(hole);
+  var svg = '<svg viewBox="' + (m.vb || '0 40 300 84') + '" role="img" aria-label="Půdorys jamky ' + hole + ': ' + esc(m.po) + '">' + m.kr + '</svg>';
+  var nejHtml = rek
+    ? '<span class="nej" title="Rekord jamky ze všech her">' + esc(rek.jmena.join(', ')) + ' ' + rek.v + '</span>'
+    : '';
+  var pasRek = rek
+    ? '<span class="rek pas" title="Rekord jamky ze všech her">Rekord: <b>' + esc(rek.jmena.join(', ')) +
+      '</b> údery: <b>' + rek.v + '</b></span>'
+    : '';
+  /* Obtížnost jamky: tečka v barvě průměru party, žádné další číslo na obrazovce. */
+  var t = heatT(prumerJamky(hole));
+  var tecka = t == null ? '' : '<i class="tt" style="background:' + heatBarva(t) + '"></i>';
+  var telo = open
+    ? '<button class="mapabtn mapa" data-act="mapaFull" aria-label="Zvětšit půdorys jamky ' + hole + '">' + svg +
+        '<div class="popis">' + tecka + '<strong style="color:var(--ink)">' + esc(m.nm) + '</strong> · ' + esc(m.po) +
+        (nejHtml ? '<span class="rek">Rekord ' + nejHtml + '</span>' : '') + '</div></button>'
+    : '<button class="mapabtn mapa pas" data-act="mapaFull" aria-label="Zvětšit půdorys jamky ' + hole + ': ' + esc(m.nm) + '">' +
+        svg + '<span class="nm"><span>' + tecka + esc(m.nm) + '</span>' + pasRek + '</span>' + '</button>';
+  var uchyt = open
+    ? '<button class="uchytm" data-drag="mapa" data-act="mapa" aria-label="Schovat půdorys jamky">' +
+        '<span class="lbl">Tahem nahoru zavřít</span><span class="bar"></span></button>'
+    : '<button class="uchytm" data-drag="mapa" data-act="mapa" aria-label="Zobrazit půdorys jamky">' +
+        '<span class="bar"></span><span class="lbl">Tahem dolů mapka</span></button>';
+  return '<div class="mapawrap" data-mapawrap>' + telo + uchyt + '</div>';
+}
+
+/* Mapka na celé obrazovce – leží nad panelem zápisu, zavře se klepnutím kamkoli. */
+function mapaZoom(hole) {
+  var m = MAPY[hole];
+  if (!m) return '';
+  return '<div class="mapazoom" data-act="mapaZoomClose" role="dialog" aria-label="Půdorys jamky ' + hole + '">' +
+    '<div class="hl">Jamka ' + (hole < 10 ? '0' : '') + hole + ' · ' + esc(m.nm) + '</div>' +
+    '<svg viewBox="' + (m.vb || '0 40 300 84') + '" role="img" aria-label="' + esc(m.po) + '">' + m.kr + '</svg>' +
+    '<div class="po">' + esc(m.po) + '</div>' +
+    '<button class="btn ghost" data-act="mapaZoomClose" style="max-width:260px">Zavřít</button>' +
+  '</div>';
+}
+
+/* 6a + 6c: úchyt jako u tabule pořadí, výchozí stav podle toho, jestli je jamka
+   rozehraná. Ruční volba přebíjí automatiku a drží se po celou jamku;
+   zavření si appka pamatuje na hru, ne globálně. */
+var mapaStav = { hole: null, rucni: null, zoom: null };
+var mapaPotlacitKlik = false;
+
+function zapsanoNaJamce(hole) {
+  var g = S.game;
+  if (!g) return 0;
+  var kola = seznamKol(g), n = 0;
+  for (var ki = 0; ki < kola.length; ki++) {
+    for (var p = 0; p < g.hraci.length; p++) if (S.scores[key(hole, p, kola[ki])]) n++;
+  }
+  return n;
+}
+
+/* Rekord jamky napříč všemi hrami, ne jen tou rozehranou. Historie na serveru
+   drží jen součty, ale każdá otevřená hra si nechává lokální kopii skóre
+   pod klíčem "g:<id>" – z těch se rekord poskádá. */
+var rekordyCache = null;
+
+function rekordyJamek() {
+  if (rekordyCache) return rekordyCache;
+  var out = {};
+  function zvaz(hole, udery, jmeno) {
+    if (!hole || !udery || isNe(udery) || !jmeno) return;
+    var r = out[hole];
+    if (!r || udery < r.v) out[hole] = { v: udery, jmena: [jmeno] };
+    else if (udery === r.v) {
+      var kl = klicHrace(jmeno);
+      var uz = r.jmena.some(function (j) { return klicHrace(j) === kl; });
+      if (!uz) r.jmena.push(jmeno);
+    }
+  }
+  (S.games || []).forEach(function (g) {
+    var c = LS.get('g:' + g.id, null);
+    if (!c || !c.skore) return;
+    var hraci = (c.game && c.game.hraci) || g.hraci || [];
+    c.skore.forEach(function (s) { zvaz(s.jamka, s.udery, hraci[s.hrac]); });
+  });
+  if (S.game) {
+    var kolaR = seznamKol(S.game);
+    for (var hh = 1; hh <= HOLES; hh++) {
+      for (var ki = 0; ki < kolaR.length; ki++) {
+        for (var p = 0; p < S.game.hraci.length; p++) {
+          zvaz(hh, S.scores[key(hh, p, kolaR[ki])], S.game.hraci[p]);
+        }
+      }
+    }
+  }
+  rekordyCache = out;
+  return out;
+}
+
+function rekordJamky(hole) { return rekordyJamek()[hole] || null; }
+
+function nejNaJamce(hole) {
+  var g = S.game;
+  if (!g) return null;
+  var kola = seznamKol(g), nej = null;
+  for (var ki = 0; ki < kola.length; ki++) {
+    for (var p = 0; p < g.hraci.length; p++) {
+      var v = S.scores[key(hole, p, kola[ki])];
+      if (v && !isNe(v) && (nej === null || v < nej)) nej = v;
+    }
+  }
+  return nej;
+}
+
+/* Průměr jamky přes celou partu – základ pro obtížnost i teplotní mapu. */
+function prumerJamky(hole) {
+  var g = S.game;
+  if (!g) return null;
+  var kola = seznamKol(g), s = 0, n = 0;
+  for (var ki = 0; ki < kola.length; ki++) {
+    for (var p = 0; p < g.hraci.length; p++) {
+      var v = S.scores[key(hole, p, kola[ki])];
+      if (v) { s += v; n++; }
+    }
+  }
+  return n ? s / n : null;
+}
+
+/* Obtížnost 0–1: eso je nula, čtyři a víc je jednička. */
+function heatT(avg) {
+  if (avg == null) return null;
+  return Math.max(0, Math.min(1, (avg - 1.6) / 2.4));
+}
+
+function heatBarva(t) {
+  if (t == null) return 'transparent';
+  return t < .5
+    ? 'color-mix(in oklab,var(--sun) ' + Math.round(t * 200) + '%,var(--turf))'
+    : 'color-mix(in oklab,var(--signal) ' + Math.round((t - .5) * 200) + '%,var(--sun))';
+}
+
+function mapaOtevrena(hole) {
+  if (mapaStav.hole === hole && mapaStav.rucni !== null) return mapaStav.rucni;
+  if (S.game && LS.get('mapa-skryta-' + S.game.id, false) === true) return false;
+  if (window.innerHeight >= 860) return true;   /* vejde se i s klávesnicí – není co schovávat */
+  return zapsanoNaJamce(hole) === 0;
+}
+
+function mapaPrepni(hole) {
+  var open = !mapaOtevrena(hole);
+  mapaStav.hole = hole;
+  mapaStav.rucni = open;
+  if (S.game) LS.set('mapa-skryta-' + S.game.id, !open);
+}
+
 var holeState = { hole: 1, player: 0, kolo: 1 };
+
+/* Pásek jamek 01–18: přehled o celém kole i navigace, místo samotných šipek. */
+function pasekJamek(aktivni) {
+  var g = S.game;
+  if (!g) return '';
+  var kola = seznamKol(g), celkem = kola.length * g.hraci.length, out = '';
+  for (var hh = 1; hh <= HOLES; hh++) {
+    var mam = 0, mane = false;
+    for (var ki = 0; ki < kola.length; ki++) {
+      for (var p = 0; p < g.hraci.length; p++) {
+        var vv = S.scores[key(hh, p, kola[ki])];
+        if (vv) { mam++; if (isNe(vv)) mane = true; }
+      }
+    }
+    var cl = 'hpin';
+    if (hh === aktivni) cl += ' now';
+    else if (mane) cl += ' fail';
+    else if (mam >= celkem) cl += ' done';
+    else if (mam) cl += ' part';
+    out += '<button class="' + cl + '" data-act="jump" data-h="' + hh + '"' +
+      (hh === aktivni ? ' data-now="1" aria-current="true"' : '') +
+      ' aria-label="Jamka ' + hh + '">' + (hh < 10 ? '0' : '') + hh + '</button>';
+  }
+  return '<div class="pasek" data-pasek>' + out + '</div>';
+}
+
+/* Aktivní jamka se dostane doprostřed pásku, ale jen když se opravdu změnila –
+   jinak by ruční posun pásku skakal zpátky. */
+var pasekPosledni = null;
+function centrujPasek() {
+  var p = document.querySelector('[data-pasek]');
+  if (!p) { pasekPosledni = null; return; }
+  if (pasekPosledni === holeState.hole) return;
+  pasekPosledni = holeState.hole;
+  var a = p.querySelector('[data-now]');
+  if (a) p.scrollLeft = Math.max(0, a.offsetLeft - p.clientWidth / 2 + a.offsetWidth / 2);
+}
 
 function sheetHole() {
   var g = S.game;
@@ -2254,10 +2686,34 @@ function sheetHole() {
     }).join('') + '</div>';
   }
 
-  var chips = g.hraci.map(function (jm, i) {
-    var v = S.scores[key(hole, i, ko)];
-    return '<button class="pchip' + (i === pi ? ' active' : '') + (v ? ' filled' : '') + (isNe(v) ? ' fail' : '') + '" data-act="pick" data-p="' + i + '">' +
-      avaHtml(jm, avaOf(g, i), 26) + esc(jm) + '<span class="v num">' + (v ? fmt(v) : '–') + '</span></button>';
+  var MINUS = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>';
+  var PLUS = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>';
+
+  /* B+C: velký hráč na řadě nahoře, zbytek jen avatary seřazení „nezapsaní první“.
+     Ani při osmi lidech se nic neposouvá do stran. */
+  var akt = g.hraci[pi] || '';
+  var aktPm = (cur && !isNe(cur))
+    ? '<button class="pcpm" data-act="pm" data-p="' + pi + '" data-d="-1" aria-label="' + esc(akt) + ': o ránu méně">' + MINUS + '</button>' +
+      '<button class="pcpm" data-act="pm" data-p="' + pi + '" data-d="1" aria-label="' + esc(akt) + ': o ránu víc">' + PLUS + '</button>'
+    : '';
+  var naRade = '<div class="narade' + (cur ? ' filled' : '') + (isNe(cur) ? ' fail' : '') + '">' +
+    avaHtml(akt, avaOf(g, pi), 40) +
+    '<span class="jm">' + esc(akt) + '</span>' +
+    '<span class="v num">' + (cur ? fmt(cur) : '–') + '</span>' + aktPm + '</div>';
+
+  var poradi = g.hraci.map(function (jm, i) { return i; })
+    .filter(function (i) { return i !== pi; })
+    .sort(function (a, b) {
+      var av = S.scores[key(hole, a, ko)] ? 1 : 0, bv = S.scores[key(hole, b, ko)] ? 1 : 0;
+      return av - bv || a - b;                    /* nezapsaní napřed, jinak pořadí hry */
+    });
+  var chips = poradi.map(function (i) {
+    var jm = g.hraci[i], v = S.scores[key(hole, i, ko)];
+    return '<button class="pava' + (v ? ' filled' : '') + (isNe(v) ? ' fail' : '') + '" ' +
+      'data-act="pick" data-p="' + i + '" title="' + esc(jm) + '" ' +
+      'aria-label="' + esc(jm) + (v ? ': ' + fmt(v) : ': zatím nezapsáno') + '">' +
+      avaHtml(jm, avaOf(g, i), 40) +
+      '<span class="v num">' + (v ? fmt(v) : '–') + '</span></button>';
   }).join('');
 
   var keys = '';
@@ -2270,6 +2726,19 @@ function sheetHole() {
   var zbyva = g.hraci.filter(function (_, i) { return !S.scores[key(hole, i, ko)]; }).length;
   var popisKola = kola.length > 1 ? ' v ' + ko + '. kole' : '';
 
+  var undoHtml = '';
+  if (undoZapis) {
+    var u = undoZapis;
+    undoHtml = '<button class="undo" data-act="undo">' +
+      '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5L4 10l5 5"/>' +
+      '<path d="M4 10h9a6 6 0 010 12h-2"/></svg>' +
+      '<span class="tx">Vrátit <b>' + esc(u.jmeno) + '</b> na ' +
+        (u.prev == null ? 'nezapsáno' : fmt(u.prev)) +
+        (u.hole !== hole ? ' (jamka ' + u.hole + ')' : '') + '</span>' +
+      '<i class="cas"></i></button>';
+  }
+
   return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Jamka ' + hole + '">' +
     '<div class="grabber"></div><div class="sheet-head">' +
       '<button class="iconbtn" data-act="prev" ' + (hole === 1 ? 'disabled style="opacity:.4"' : '') + ' aria-label="Předchozí jamka">' + ico('zpet') + '</button>' +
@@ -2278,14 +2747,18 @@ function sheetHole() {
       '<button class="iconbtn" data-act="close" aria-label="Zavřít">' + ico('zavrit') + '</button>' +
     '</div>' +
     prepinac +
+    pasekJamek(hole) +
+    mapaJamky(hole) +
+    naRade +
     '<div class="pchips">' + chips + '</div>' +
     '<div class="keypad">' + keys + '</div>' +
+    undoHtml +
     '<div class="hint">' + (zbyva ? 'Zbývá zapsat: ' + zbyva + ' ' + pl(zbyva, 'hráč', 'hráči', 'hráčů') + popisKola : 'Jamka je kompletní.') + ' Přejetím prstem přepneš jamku.</div>' +
     '<div class="row" style="margin-top:10px">' +
       '<button class="btn ghost" data-act="close">Hotovo</button>' +
       (hole < HOLES ? '<button class="btn" data-act="next">Jamka ' + (hole + 1) + ' →</button>' : '') +
     '</div>' +
-  '</div></div>';
+  '</div></div>' + (mapaStav.zoom === hole ? mapaZoom(hole) : '');
 }
 
 /* ---------- nová hra ---------- */
@@ -2607,6 +3080,12 @@ document.addEventListener('click', function (ev) {
     case 'tab': S.tab = t.getAttribute('data-tab'); paint(); break;
     case 'tabule': if (tabulePotlacitKlik) break; LS.set('tabule', !tabuleOtevrena()); paint(); break;
 
+    case 'mapa':
+      if (mapaPotlacitKlik) break;
+      mapaPrepni(holeState.hole); paint({ sheetOnly: true }); break;
+    case 'mapaFull': mapaStav.zoom = holeState.hole; paint({ sheetOnly: true }); break;
+    case 'mapaZoomClose': mapaStav.zoom = null; paint({ sheetOnly: true }); break;
+
     case 'new':
       formState = { datum: todayISO(), misto: '', hraci: LS.get('lastPlayers', ['', '']), avatary: LS.get('lastAvatars', []), kola: LS.get('lastKola', 1) };
       if (!formState.hraci.length) formState.hraci = ['', ''];
@@ -2673,11 +3152,52 @@ document.addEventListener('click', function (ev) {
 
     case 'pick': holeState.player = Number(t.getAttribute('data-p')); paint({ sheetOnly: true }); break;
 
+    /* Oprava už zapsaného čísla – bez otevírání klávesnice. */
+    case 'pm':
+      var pmP = Number(t.getAttribute('data-p')), pmD = Number(t.getAttribute('data-d'));
+      var pmStare = S.scores[key(holeState.hole, pmP, holeState.kolo)];
+      if (!pmStare || isNe(pmStare)) break;
+      var pmNove = Math.max(1, Math.min(MAX_UDERU, pmStare + pmD));
+      if (pmNove === pmStare) break;
+      if (navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
+      zapamatujUndo(holeState.hole, pmP, holeState.kolo, pmStare, (S.game.hraci[pmP] || ''));
+      setScore(holeState.hole, pmP, pmNove, holeState.kolo);
+      paint({ sheetOnly: true });
+      break;
+
+    /* Pásek jamek: skoč na jamku, kolo i hráče dopočítá stejně jako šipky. */
+    case 'jump':
+      holeState.hole = Number(t.getAttribute('data-h'));
+      holeState.kolo = prvniNedohraneKolo(holeState.hole);
+      holeState.player = firstEmptyPlayer(holeState.hole, holeState.kolo);
+      paint({ sheetOnly: true });
+      break;
+
+    case 'undo':
+      if (!undoZapis) break;
+      var uz = undoZapis;
+      undoZapis = null;
+      if (undoTimer) clearTimeout(undoTimer);
+      holeState.hole = uz.hole; holeState.kolo = uz.kolo; holeState.player = uz.player;
+      if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+      setScore(uz.hole, uz.player, uz.prev, uz.kolo);
+      toast(uz.prev == null ? 'Zápis vrácen' : uz.jmeno + ' zpátky na ' + fmt(uz.prev));
+      paint({ sheetOnly: true });
+      break;
+
+    case 'lbHrac':
+      detailHraceHra = Number(t.getAttribute('data-p'));
+      openSheet = sheetHraHrac; paint();
+      break;
+
     case 'set':
       var raw = t.getAttribute('data-n');
       var n = raw === '' ? null : Number(raw);
       if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
       var byloHotovo = koloKompletni(holeState.hole, holeState.kolo);
+      zapamatujUndo(holeState.hole, holeState.player, holeState.kolo,
+        S.scores[key(holeState.hole, holeState.player, holeState.kolo)] || null,
+        (S.game && S.game.hraci[holeState.player]) || '');
       setScore(holeState.hole, holeState.player, n, holeState.kolo);
       if (n != null) {
         var nx = nextEmptyPlayer(holeState.hole, holeState.player, holeState.kolo);
@@ -2972,10 +3492,11 @@ document.addEventListener('keydown', function (e) {
   }, { passive: true });
 })();
 
-/* ---------- vytažení tabule pořadí prstem ----------
-   Úchyt pod pořadím jde chytit a vytáhnout: tah dolů rozbalí průběh po
-   jamkách, tah nahoru ho zase zasune. Karta jde za prstem, po puštění
-   se buď překlopí, nebo pruží zpět. */
+/* ---------- tabule pořadí tažením prstem ----------
+   Rozbalený průběh po jamkách zabírá méně místa než kartičky, proto se
+   tabule tahem nahoru zatahuje do úhledného seznamu a tahem dolů zase
+   vytahuje zpátky do kartiček. Karta jde za prstem, po puštění se buď
+   překlopí, nebo pruží zpět. */
 (function () {
   var wrap = null, y0 = 0, dy = 0, dolu = true, prekloplo = false;
 
@@ -2992,7 +3513,7 @@ document.addEventListener('keydown', function (e) {
     wrap = uchyt.closest('[data-tabulewrap]');
     if (!wrap) return;
     y0 = e.clientY; dy = 0; prekloplo = false;
-    dolu = !tabuleOtevrena();
+    dolu = tabuleOtevrena();   /* rozbalené se zatahuje dolů, sbalené se vytahuje nahoru */
     wrap.classList.add('tahne');
   });
 
@@ -3005,7 +3526,7 @@ document.addEventListener('keydown', function (e) {
       prekloplo = true;
       if (navigator.vibrate) { try { navigator.vibrate(8); } catch (err) {} }
       konec();
-      LS.set('tabule', dolu);
+      LS.set('tabule', !tabuleOtevrena());
       paint();
     }
   }, { passive: true });
@@ -3021,11 +3542,53 @@ document.addEventListener('keydown', function (e) {
 })();
 var tabulePotlacitKlik = false;
 
+/* Tah za úchyt mapky – stejné gesto i prahy jako u tabule pořadí. */
+(function () {
+  var wrap = null, y0 = 0, dolu = false, prekloplo = false;
+  function konec() {
+    if (!wrap) return;
+    wrap.classList.remove('tahne');
+    wrap.style.removeProperty('--tahm');
+    wrap = null;
+  }
+  document.addEventListener('pointerdown', function (e) {
+    var u = e.target.closest && e.target.closest('[data-drag="mapa"]');
+    if (!u) return;
+    wrap = u.closest('[data-mapawrap]');
+    if (!wrap) return;
+    y0 = e.clientY; prekloplo = false;
+    dolu = !mapaOtevrena(holeState.hole);   /* zavřená se vytahuje dolů, otevřená zatahuje nahoru */
+    wrap.classList.add('tahne');
+  });
+  document.addEventListener('pointermove', function (e) {
+    if (!wrap) return;
+    var dy = e.clientY - y0;
+    var t = dolu ? Math.max(-8, Math.min(70, dy)) : Math.min(8, Math.max(-70, dy));
+    wrap.style.setProperty('--tahm', t.toFixed(1) + 'px');
+    if (!prekloplo && (dolu ? dy > 40 : dy < -40)) {
+      prekloplo = true;
+      if (navigator.vibrate) { try { navigator.vibrate(8); } catch (err) {} }
+      konec();
+      mapaPrepni(holeState.hole);
+      paint({ sheetOnly: true });
+    }
+  }, { passive: true });
+  document.addEventListener('pointerup', function () {
+    var bylo = prekloplo;
+    konec();
+    if (bylo) {
+      mapaPotlacitKlik = true;
+      setTimeout(function () { mapaPotlacitKlik = false; }, 60);
+    }
+  });
+  document.addEventListener('pointercancel', konec);
+})();
+
 /* ---------- přejetí prstem mezi jamkami ---------- */
 var swipeX = null, swipeY = null;
 document.addEventListener('touchstart', function (e) {
   if (openSheet !== sheetHole) return;
-  if (e.target.closest && e.target.closest('.pchips')) return;
+  if (e.target.closest && (e.target.closest('.pchips') || e.target.closest('.pasek'))) return;
   var t = e.changedTouches[0];
   swipeX = t.clientX; swipeY = t.clientY;
 }, { passive: true });
