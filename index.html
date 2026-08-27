@@ -300,6 +300,21 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
   animation:up .22s cubic-bezier(.2,.8,.3,1);
 }
 @keyframes up{from{transform:translateY(24px)}to{transform:none}}
+
+/* 5 – panel jamky přijede ze strany podle směru přejetí, ne fade. */
+@keyframes jamkaZL{from{transform:translateX(-26px);opacity:.35}to{transform:none;opacity:1}}
+@keyframes jamkaZP{from{transform:translateX(26px);opacity:.35}to{transform:none;opacity:1}}
+.sheet-in.zl{animation:jamkaZL .2s cubic-bezier(.2,.8,.3,1)}
+.sheet-in.zp{animation:jamkaZP .2s cubic-bezier(.2,.8,.3,1)}
+
+/* 3 – zapsané číslo krátce vyskočí. */
+@keyframes cisloPop{0%{transform:scale(1)}35%{transform:scale(1.42)}100%{transform:scale(1)}}
+.narade .v.pop{animation:cisloPop .3s cubic-bezier(.3,1.6,.4,1)}
+.pava .v.pop{animation:cisloPop .3s cubic-bezier(.3,1.6,.4,1)}
+
+/* 10 – nový rekord jamky se oznámí přímo v mapce. */
+@keyframes rekordBlik{0%,100%{opacity:1}50%{opacity:.35}}
+.mapa .rekord-novy{animation:rekordBlik .7s ease-in-out 2}
 @media (prefers-reduced-motion:reduce){.sheet,.sheet-in{animation:none}.hole .fill{transition:none}}
 .sheet.noanim,.sheet.noanim .sheet-in{animation:none}
 .sheet-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -336,6 +351,18 @@ html[data-styl="bloky"][data-tmavy] .narade{color:#151310}
 .pava{flex:none;width:44px;padding:0;background:none;border:0;color:var(--ink-soft);
   display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
 .pava .ava{opacity:.68;transition:opacity .15s ease}
+.pava{transition:transform .26s cubic-bezier(.2,.8,.3,1)}
+@media (prefers-reduced-motion:reduce){
+  .pava,.hpin{transition:none}
+  .sheet-in.zl,.sheet-in.zp,.narade .v.pop,.pava .v.pop,.mapa .rekord-novy{animation:none}
+}
+
+/* 6 – kdo je právě v čele a o kolik, bez otevírání tabule. */
+.souboj{display:flex;align-items:center;gap:8px;min-height:34px;margin-bottom:8px;
+  padding:0 4px;font-size:12px;color:var(--ink-soft)}
+.souboj b{font-weight:700;color:var(--ink)}
+.souboj .roz{font-family:var(--display);color:var(--sun);white-space:nowrap}
+.souboj .tah{margin-left:auto;white-space:nowrap}
 .pava .v{font-family:var(--display);font-size:13px;line-height:1;color:var(--ink-soft)}
 .pava.filled .ava{opacity:1}
 .pava.filled .v{color:var(--turf)}
@@ -604,6 +631,7 @@ html[data-tmavy] .porovnani.lepsi{color:var(--turf)}
 .mapa.pas .nej{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%}
 .mapa .rek{display:block;margin-top:3px;font-size:11px;color:var(--ink-soft);
   letter-spacing:.02em}
+.mapa .rek b{font-family:var(--display);font-weight:400;color:var(--sun)}
 
 /* Pásek jamek 01–18 – přehled i navigace v jednom řádku. Hotová zeleně,
    rozehraná zlatě, nedaná červeně, aktuální plná. */
@@ -612,7 +640,8 @@ html[data-tmavy] .porovnani.lepsi{color:var(--turf)}
 .pasek::-webkit-scrollbar{display:none}
 .hpin{flex:none;width:44px;height:44px;border-radius:13px;
   border:var(--hrana,1px) solid var(--line);background:var(--card);
-  font-family:var(--display);font-size:14px;color:var(--ink-soft);display:grid;place-items:center}
+  font-family:var(--display);font-size:14px;color:var(--ink-soft);display:grid;place-items:center;
+  transition:background-color .25s ease,border-color .25s ease,color .2s ease}
 .hpin.part{border-color:color-mix(in srgb,var(--sun) 55%,transparent);color:var(--sun)}
 .hpin.done{border-color:color-mix(in srgb,var(--turf) 55%,transparent);
   background:color-mix(in srgb,var(--turf) 14%,var(--card));color:var(--turf)}
@@ -1204,9 +1233,11 @@ var lastSheet = null;
    aby se stránka pod ním nepřepisovala a nic neproblikávalo. */
 function paint(opts) {
   opts = opts || {};
+  if (opts.flip) flipUloz();
   if (!opts.sheetOnly) renderRoot();
   renderOverlay();
   centrujPasek();
+  flipPrehraj();
   if (afterPaint) { var f = afterPaint; afterPaint = null; f(); }
 }
 
@@ -2496,10 +2527,10 @@ function mapaJamky(hole) {
   var open = mapaOtevrena(hole), rek = rekordJamky(hole);
   var svg = '<svg viewBox="' + (m.vb || '0 40 300 84') + '" role="img" aria-label="Půdorys jamky ' + hole + ': ' + esc(m.po) + '">' + m.kr + '</svg>';
   var nejHtml = rek
-    ? '<span class="nej" title="Rekord jamky ze všech her">' + esc(rek.jmena.join(', ')) + ' ' + rek.v + '</span>'
+    ? '<span class="nej' + (rekordNovy === hole ? ' rekord-novy' : '') + '" title="Rekord jamky ze všech her">' + esc(rek.jmena.join(', ')) + ' ' + rek.v + '</span>'
     : '';
   var pasRek = rek
-    ? '<span class="rek pas" title="Rekord jamky ze všech her">Rekord: <b>' + esc(rek.jmena.join(', ')) +
+    ? '<span class="rek pas' + (rekordNovy === hole ? ' rekord-novy' : '') + '" title="Rekord jamky ze všech her">Rekord: <b>' + esc(rek.jmena.join(', ')) +
       '</b> údery: <b>' + rek.v + '</b></span>'
     : '';
   /* Obtížnost jamky: tečka v barvě průměru party, žádné další číslo na obrazovce. */
@@ -2508,7 +2539,7 @@ function mapaJamky(hole) {
   var telo = open
     ? '<button class="mapabtn mapa" data-act="mapaFull" aria-label="Zvětšit půdorys jamky ' + hole + '">' + svg +
         '<div class="popis">' + tecka + '<strong style="color:var(--ink)">' + esc(m.nm) + '</strong> · ' + esc(m.po) +
-        (nejHtml ? '<span class="rek">Rekord ' + nejHtml + '</span>' : '') + '</div></button>'
+        (rek ? '<span class="rek">Rekord: <b>' + esc(rek.jmena.join(', ')) + '</b> údery: <b>' + rek.v + '</b></span>' : '') + '</div></button>'
     : '<button class="mapabtn mapa pas" data-act="mapaFull" aria-label="Zvětšit půdorys jamky ' + hole + ': ' + esc(m.nm) + '">' +
         svg + '<span class="nm"><span>' + tecka + esc(m.nm) + '</span>' + pasRek + '</span>' + '</button>';
   var uchyt = open
@@ -2680,6 +2711,36 @@ function centrujPasek() {
   if (a) p.scrollLeft = Math.max(0, a.offsetLeft - p.clientWidth / 2 + a.offsetWidth / 2);
 }
 
+/* Mikrointerakce panelu jamky: 2 – avatary se přesouvají plynule (FLIP),
+   3 – zapsané číslo vyskočí, 5 – panel přijede ze strany podle směru přejetí. */
+var popHrac = null, smerJamky = '', flipPozice = null, rekordNovy = null;
+
+function flipUloz() {
+  flipPozice = {};
+  document.querySelectorAll('.pchips .pava').forEach(function (el) {
+    flipPozice[el.getAttribute('data-p')] = el.getBoundingClientRect().left;
+  });
+}
+
+function flipPrehraj() {
+  if (!flipPozice) return;
+  var stare = flipPozice;
+  flipPozice = null;
+  document.querySelectorAll('.pchips .pava').forEach(function (el) {
+    var p = el.getAttribute('data-p');
+    if (!(p in stare)) return;
+    var dx = stare[p] - el.getBoundingClientRect().left;
+    if (Math.abs(dx) < 2) return;
+    el.style.transition = 'none';
+    el.style.transform = 'translateX(' + dx + 'px)';
+    requestAnimationFrame(function () { el.style.transition = ''; el.style.transform = ''; });
+  });
+}
+
+/* Zapsané číslo poblízne jen jednou – další překreslení už je bez animace. */
+function pop(i) { popHrac = i; setTimeout(function () { popHrac = null; }, 400); }
+function smer(s) { smerJamky = s; setTimeout(function () { smerJamky = ''; }, 260); }
+
 function sheetHole() {
   var g = S.game;
   var hole = holeState.hole, pi = holeState.player;
@@ -2710,7 +2771,19 @@ function sheetHole() {
   var naRade = '<div class="narade' + (cur ? ' filled' : '') + (isNe(cur) ? ' fail' : '') + '">' +
     avaHtml(akt, avaOf(g, pi), 40) +
     '<span class="jm">' + esc(akt) + '</span>' +
-    '<span class="v num">' + (cur ? fmt(cur) : '–') + '</span>' + aktPm + '</div>';
+    '<span class="v num' + (popHrac === pi ? ' pop' : '') + '">' + (cur ? fmt(cur) : '–') + '</span>' + aktPm + '</div>';
+
+  /* 6 – živý souboj: kdo vede a o kolik, plus kdo je na řadě. */
+  var stH = standings(g, S.scores), souboj = '';
+  var odehrane = stH.filter(function (r) { return r.jamky > 0; });
+  if (odehrane.length > 1) {
+    var v1 = odehrane[0], v2 = odehrane[1];
+    var roz = v2.soucet - v1.soucet;
+    souboj = '<div class="souboj">' +
+      '<span>Vede <b>' + esc(v1.jmeno) + '</b> ' +
+      (roz === 0 ? 'shodně s <b>' + esc(v2.jmeno) + '</b>' : 'o <span class="roz">' + roz + '</span> ' + pl(roz, 'bod', 'body', 'bodů')) +
+      '</span><span class="tah">Na řadě <b>' + esc(akt) + '</b></span></div>';
+  }
 
   var poradi = g.hraci.map(function (jm, i) { return i; })
     .filter(function (i) { return i !== pi; })
@@ -2724,7 +2797,7 @@ function sheetHole() {
       'data-act="pick" data-p="' + i + '" title="' + esc(jm) + '" ' +
       'aria-label="' + esc(jm) + (v ? ': ' + fmt(v) : ': zatím nezapsáno') + '">' +
       avaHtml(jm, avaOf(g, i), 40) +
-      '<span class="v num">' + (v ? fmt(v) : '–') + '</span></button>';
+      '<span class="v num' + (popHrac === i ? ' pop' : '') + '">' + (v ? fmt(v) : '–') + '</span></button>';
   }).join('');
 
   /* Ukončená hra: jamky jdou procházet a prohlížet, ale zapisovat už ne. */
@@ -2780,7 +2853,7 @@ function sheetHole() {
       '<i class="cas"></i></button>';
   }
 
-  return '<div class="sheet" data-act="close-bg"><div class="sheet-in" role="dialog" aria-label="Jamka ' + hole + '">' +
+  return '<div class="sheet" data-act="close-bg"><div class="sheet-in' + (smerJamky ? ' ' + smerJamky : '') + '" role="dialog" aria-label="Jamka ' + hole + '">' +
     '<div class="grabber"></div><div class="sheet-head">' +
       '<button class="iconbtn" data-act="prev" ' + (hole === 1 ? 'disabled style="opacity:.4"' : '') + ' aria-label="Předchozí jamka">' + ico('zpet') + '</button>' +
       '<div class="t" style="text-align:center">Jamka ' + (hole < 10 ? '0' : '') + hole + '</div>' +
@@ -2790,6 +2863,7 @@ function sheetHole() {
     prepinac +
     pasekJamek(hole) +
     mapaJamky(hole) +
+    souboj +
     naRade +
     '<div class="pchips">' + chips + '</div>' +
     '<div class="keypad">' + keys + '</div>' +
@@ -3199,10 +3273,11 @@ document.addEventListener('click', function (ev) {
       if (!pmStare || isNe(pmStare)) break;
       var pmNove = Math.max(1, Math.min(MAX_UDERU, pmStare + pmD));
       if (pmNove === pmStare) break;
+      pop(pmP);
       if (navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
       zapamatujUndo(holeState.hole, pmP, holeState.kolo, pmStare, (S.game.hraci[pmP] || ''));
       setScore(holeState.hole, pmP, pmNove, holeState.kolo);
-      paint({ sheetOnly: true });
+      paint({ sheetOnly: true, flip: true });
       break;
 
     /* Pásek jamek: skoč na jamku, kolo i hráče dopočítá stejně jako šipky. */
@@ -3235,10 +3310,21 @@ document.addEventListener('click', function (ev) {
       var n = raw === '' ? null : Number(raw);
       if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
       var byloHotovo = koloKompletni(holeState.hole, holeState.kolo);
+      var rekPred = rekordJamky(holeState.hole);
+      pop(holeState.player);
       zapamatujUndo(holeState.hole, holeState.player, holeState.kolo,
         S.scores[key(holeState.hole, holeState.player, holeState.kolo)] || null,
         (S.game && S.game.hraci[holeState.player]) || '');
       setScore(holeState.hole, holeState.player, n, holeState.kolo);
+      /* 10 – nový rekord jamky se oznámí hned při zápisu. */
+      if (n != null && !isNe(n)) {
+        var rekPo = rekordJamky(holeState.hole);
+        if (rekPo && (!rekPred || rekPo.v < rekPred.v)) {
+          rekordNovy = holeState.hole;
+          setTimeout(function () { rekordNovy = null; }, 2600);
+          toast('Nový rekord jamky ' + holeState.hole + ': ' + rekPo.v + '!');
+        }
+      }
       if (n != null) {
         var nx = nextEmptyPlayer(holeState.hole, holeState.player, holeState.kolo);
         if (nx != null) holeState.player = nx;
@@ -3256,7 +3342,7 @@ document.addEventListener('click', function (ev) {
             : 'Jamka ' + zJamky + ' hotová → jamka ' + krok.hole);
         }
       }
-      paint({ sheetOnly: true });
+      paint({ sheetOnly: true, flip: true });
       break;
 
     case 'setKolo':
@@ -3265,8 +3351,8 @@ document.addEventListener('click', function (ev) {
       paint({ sheetOnly: true });
       break;
 
-    case 'prev': if (holeState.hole > 1) { holeState.hole--; holeState.kolo = prvniNedohraneKolo(holeState.hole); holeState.player = firstEmptyPlayer(holeState.hole, holeState.kolo); paint({ sheetOnly: true }); } break;
-    case 'next': if (holeState.hole < HOLES) { holeState.hole++; holeState.kolo = prvniNedohraneKolo(holeState.hole); holeState.player = firstEmptyPlayer(holeState.hole, holeState.kolo); paint({ sheetOnly: true }); } break;
+    case 'prev': if (holeState.hole > 1) { smer('zl'); holeState.hole--; holeState.kolo = prvniNedohraneKolo(holeState.hole); holeState.player = firstEmptyPlayer(holeState.hole, holeState.kolo); paint({ sheetOnly: true }); } break;
+    case 'next': if (holeState.hole < HOLES) { smer('zp'); holeState.hole++; holeState.kolo = prvniNedohraneKolo(holeState.hole); holeState.player = firstEmptyPlayer(holeState.hole, holeState.kolo); paint({ sheetOnly: true }); } break;
 
     case 'close':
     case 'close-bg':
@@ -3639,8 +3725,8 @@ document.addEventListener('touchend', function (e) {
   var dx = t.clientX - swipeX, dy = t.clientY - swipeY;
   swipeX = null;
   if (Math.abs(dx) < 70 || Math.abs(dy) > 55) return;
-  if (dx < 0 && holeState.hole < HOLES) holeState.hole++;
-  else if (dx > 0 && holeState.hole > 1) holeState.hole--;
+  if (dx < 0 && holeState.hole < HOLES) { smer('zp'); holeState.hole++; }
+  else if (dx > 0 && holeState.hole > 1) { smer('zl'); holeState.hole--; }
   else return;
   holeState.kolo = prvniNedohraneKolo(holeState.hole);
   holeState.player = firstEmptyPlayer(holeState.hole, holeState.kolo);
