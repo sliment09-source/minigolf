@@ -315,6 +315,7 @@ h3{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:0 0 4px
 /* 10 – nový rekord jamky se oznámí přímo v mapce. */
 @keyframes rekordBlik{0%,100%{opacity:1}50%{opacity:.35}}
 .mapa .rekord-novy{animation:rekordBlik .7s ease-in-out 2}
+
 @media (prefers-reduced-motion:reduce){.sheet,.sheet-in{animation:none}.hole .fill{transition:none}}
 .sheet.noanim,.sheet.noanim .sheet-in{animation:none}
 .sheet-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -499,6 +500,42 @@ tr.win td.sticky{color:var(--cobalt)}
 .barrow .track{flex:1;height:9px;border-radius:999px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden;min-width:30px}
 .barrow .fillb{height:100%;border-radius:999px;background:var(--cobalt);transition:width .3s ease}
 .barrow.best .fillb{background:var(--turf)}
+
+/* 7c – bod na společné ose místo pruhu od nuly. Pruh začínal v nule, takže celý
+   rozdíl mezi hráči se „smrsknul“ do posledních pár procent délky. */
+.barrow .osa{flex:1;min-width:40px;height:26px;position:relative}
+.barrow .osa::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;
+  background:color-mix(in srgb,var(--ink) 12%,transparent)}
+.barrow .bod{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;
+  transform:translate(-50%,-50%);background:var(--cobalt-bod,var(--ink-soft));
+  transition:left .3s ease}
+.barrow.best .bod{width:13px;height:13px;background:var(--turf);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--turf) 20%,transparent)}
+.barrow.worst .bod{background:var(--signal);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--signal) 16%,transparent)}
+.osaleg{display:flex;align-items:center;gap:10px;margin:-2px 0 10px;padding:0 12px}
+.osaleg .nm{flex:0 0 76px}
+.osaleg .sk{flex:1;min-width:40px;display:grid;grid-template-columns:1fr 1fr 1fr;
+  font-family:var(--display);font-size:11px;color:var(--ink-soft)}
+.osaleg .sk span:nth-child(2){text-align:center}
+.osaleg .sk span:last-child{text-align:right}
+.osaleg .v{flex:0 0 42px}
+.osaleg .ava-sp{flex:0 0 26px}
+@media (prefers-reduced-motion:reduce){.barrow .bod{transition:none}}
+
+/* Přepínač osa / prsteny u průměru na jamku. */
+.prstgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:12px;
+  background:var(--card);border:var(--hrana) solid var(--obrys);border-radius:var(--r-s);
+  padding:16px 14px;margin-bottom:8px;box-shadow:var(--shadow-s)}
+.prst{display:flex;flex-direction:column;align-items:center;gap:7px;background:none;border:0;
+  color:inherit;font:inherit;padding:0}
+.prst .kruh{width:74px;height:74px;border-radius:50%;display:grid;place-items:center}
+.prst .stred{width:56px;height:56px;border-radius:50%;background:var(--card);display:grid;
+  place-items:center;font-family:var(--display);font-size:16px;color:var(--ink)}
+.prst.best .stred{color:var(--turf)}
+.prst.worst .stred{color:var(--signal)}
+.prst .nm{font-size:12px;font-weight:600;max-width:84px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
 .barrow .v{font-family:var(--display);font-size:19px;min-width:42px;text-align:right}
 
 .holebars{display:flex;align-items:flex-end;gap:3px;height:118px;background:var(--card);
@@ -1999,17 +2036,10 @@ function viewKariera() {
     return h + '<div class="empty" style="margin-top:16px">Zatím není z čeho počítat. Odehrajte první hru a zapište pár úderů.</div></div>';
   }
 
-  h += '<h2 style="margin-top:14px">Průměr na jamku</h2>';
-  var nejhorsi = Math.max.apply(null, k.hraci.map(function (x) { return x.prumer; }));
-  k.hraci.forEach(function (x, i) {
-    h += '<div class="barrow' + (i === 0 ? ' best' : '') + '" data-act="hrac" data-i="' + i + '">' +
-      avaHtml(x.jmeno, x.avatar, 26) +
-      '<span class="nm">' + esc(x.jmeno) + '</span>' +
-      '<span class="track"><span class="fillb" style="width:' + Math.round((x.prumer / nejhorsi) * 100) + '%"></span></span>' +
-      '<span class="v num">' + x.prumer.toFixed(2).replace('.', ',') + '</span>' +
-    '</div>';
-  });
-  h += '<div class="hint">Ze všech her dohromady, i z rozehraných. Nižší číslo je lepší.</div>';
+  h += prumerBlok(k.hraci.map(function (x, i) {
+    return { avg: x.prumer, jmeno: x.jmeno, ava: avaHtml(x.jmeno, x.avatar, 26), act: 'hrac', idx: i };
+  }), 'Průměr na jamku', 'Ze všech her dohromady, i z rozehraných. Nižší číslo je lepší – osa je napínutá mezi nejlepším a nejhorším průměrem, takže rozestupy odpovídají skutečným rozdílům.',
+     'Ze všech her dohromady, i z rozehraných. Nižší číslo je lepší – zelený prsten má nejlepší průměr, červený nejhorší. Klepnutím otevřeš detail hráče.');
 
   var r = k.rekordy;
   if (r.nejKolo || r.nejEsa || r.nejSerie) {
@@ -2098,6 +2128,53 @@ function posledniSestavy(max) {
 }
 
 /* ---------- statistiky jedné hry ---------- */
+/* Průměr na jamku: buď body na společné ose, nebo prsteny. Volba se pamatuje. */
+function prumerBlok(radky, nadpis, poznamka, poznamkaPrsteny) {
+  function dve(n) { return n.toFixed(2).replace('.', ','); }
+  var rezim = LS.get('prumer-rezim', 'osa');
+  var prum = radky.map(function (r) { return r.avg; });
+  var minP = Math.min.apply(null, prum), maxP = Math.max.apply(null, prum);
+  var rozP = (maxP - minP) || 1;
+  var h = '<div class="row" style="align-items:center;justify-content:space-between;gap:10px;margin-top:14px">' +
+    '<h2 style="margin:0">' + nadpis + '</h2>' +
+    '<div class="tabs" style="margin:0;flex:0 0 auto;display:flex;width:max-content">' +
+      '<button class="tab' + (rezim === 'osa' ? ' on' : '') + '" data-act="prumRezim" data-r="osa" ' +
+        'style="flex:0 0 auto;overflow:visible;padding:12px 16px">Osa</button>' +
+      '<button class="tab' + (rezim === 'prsteny' ? ' on' : '') + '" data-act="prumRezim" data-r="prsteny" ' +
+        'style="flex:0 0 auto;overflow:visible;padding:12px 16px">Prsteny</button>' +
+    '</div></div>';
+
+  if (rezim === 'prsteny') {
+    /* Podíl na kruhu: nejlepší průměr začíná na 42 %, nejhorší končí na 62 %. */
+    h += '<div class="prstgrid">' + radky.map(function (r) {
+      var turn = (0.42 + ((r.avg - minP) / rozP) * 0.2).toFixed(3);
+      var barva = r.avg === minP ? 'var(--turf)' : (r.avg === maxP && maxP !== minP ? 'var(--signal)' : 'var(--ink-soft)');
+      return '<button class="prst' + (r.avg === minP ? ' best' : '') + (r.avg === maxP && maxP !== minP ? ' worst' : '') + '"' +
+        (r.act ? ' data-act="' + r.act + '" data-i="' + r.idx + '"' : '') + '>' +
+        '<span class="kruh" style="background:conic-gradient(' + barva + ' 0turn ' + turn + 'turn,' +
+          'color-mix(in srgb,var(--ink) 10%,transparent) ' + turn + 'turn 1turn)">' +
+          '<span class="stred num">' + dve(r.avg) + '</span></span>' +
+        '<span class="nm">' + esc(r.jmeno) + '</span></button>';
+    }).join('') + '</div>';
+  } else {
+    h += radky.map(function (r) {
+      var pct = ((r.avg - minP) / rozP) * 92 + 4;   /* 4–96 %, ať se bod nikde nesekoří */
+      return '<div class="barrow' + (r.avg === minP ? ' best' : '') + (r.avg === maxP && maxP !== minP ? ' worst' : '') + '"' +
+        (r.act ? ' data-act="' + r.act + '" data-i="' + r.idx + '"' : '') + '>' +
+        r.ava +
+        '<span class="nm">' + esc(r.jmeno) + '</span>' +
+        '<span class="osa"><span class="bod" style="left:' + pct.toFixed(1) + '%"></span></span>' +
+        '<span class="v num">' + dve(r.avg) + '</span></div>';
+    }).join('');
+    if (radky.length > 1 && maxP !== minP) {
+      h += '<div class="osaleg"><span class="ava-sp"></span><span class="nm"></span>' +
+        '<span class="sk"><span>' + dve(minP) + '</span><span>' + dve((minP + maxP) / 2) + '</span>' +
+        '<span>' + dve(maxP) + '</span></span><span class="v"></span></div>';
+    }
+  }
+  return h + '<div class="hint">' + (rezim === 'prsteny' ? poznamkaPrsteny : poznamka) + '</div>';
+}
+
 function statistiky(g, st) {
   var np = g.hraci.length;
 
@@ -2152,18 +2229,10 @@ function statistiky(g, st) {
   '</div>';
 
   // průměr na jamku podle hráčů
-  h2 += '<h2>Průměr na jamku</h2>';
-  hraciSeSkore.forEach(function (r) {
-    var avg = r.soucet / r.jamky;
-    var sirka = Math.round(avg / nejhorsiPrumer * 100);
-    h2 += '<div class="barrow' + (avg === nejlepsiPrumer ? ' best' : '') + '">' +
-      avaHtml(r.jmeno, avaOf(g, r.i), 26) +
-      '<span class="nm">' + esc(r.jmeno) + '</span>' +
-      '<span class="track"><span class="fillb" style="width:' + sirka + '%"></span></span>' +
-      '<span class="v num">' + jedno(avg) + '</span>' +
-    '</div>';
-  });
-  h2 += '<div class="hint">Nižší číslo je lepší. Zelený pruh má hráč s nejlepším průměrem.</div>';
+  h2 += prumerBlok(hraciSeSkore.map(function (r) {
+    return { avg: r.soucet / r.jamky, jmeno: r.jmeno, ava: avaHtml(r.jmeno, avaOf(g, r.i), 26) };
+  }), 'Průměr na jamku', 'Nižší číslo je lepší. Osa je napínutá mezi nejlepším a nejhorším průměrem – vzdálenost bodů je skutečný rozdíl.',
+     'Nižší číslo je lepší. Zelený prsten má nejlepší průměr v téhle hře, červený nejhorší.');
 
   // obtížnost jamek
   h2 += '<h2>Obtížnost jamek</h2><div class="holebars">';
@@ -3298,6 +3367,11 @@ document.addEventListener('click', function (ev) {
       setScore(uz.hole, uz.player, uz.prev, uz.kolo);
       toast(uz.prev == null ? 'Zápis vrácen' : uz.jmeno + ' zpátky na ' + fmt(uz.prev));
       paint({ sheetOnly: true });
+      break;
+
+    case 'prumRezim':
+      LS.set('prumer-rezim', t.getAttribute('data-r'));
+      paint();
       break;
 
     case 'lbHrac':
